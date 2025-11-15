@@ -493,3 +493,8 @@ pytest:
 .PHONY: format-and-pytest
 format-and-pytest:
 	RUNTIME=docker ./util/docker_cmd.sh bash -lic "$(CONTAINER_PREAMBLE); qmk format-c --core-only -a && qmk format-python -a && qmk pytest"
+
+.PHONY: compile-tknw
+compile-tknw:
+	qmk compile -kb crkbd/rev4_1/standard -km tknw
+	open .
