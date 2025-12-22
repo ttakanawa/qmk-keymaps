@@ -1,5 +1,8 @@
 #include QMK_KEYBOARD_H
 
+// Define NA for unused keys
+#define NA XXXXXXX
+
 // ENT_SFT tap time threshold (ms)
 #define ENT_SFT_TAP_TERM 400
 
@@ -17,11 +20,11 @@ enum {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-  XXXXXXX,TD(TD_Q_ESC),    KC_W,    KC_E,    KC_R,    KC_T,  KC_TAB,    RM_TOGG,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P, XXXXXXX,
+       NA,TD(TD_Q_ESC),    KC_W,    KC_E,    KC_R,    KC_T,  KC_TAB,    RM_TOGG,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-      XXXXXXX,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G, KC_LSFT,    XXXXXXX,    KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN, XXXXXXX,
+           NA,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G, KC_LSFT,         NA,    KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-      XXXXXXX,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH, XXXXXXX,
+           NA,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           KC_LOPT, KC_LCTL, KC_LCMD,    ENT_SFT,  KC_SPC,TD(TD_MO1_SHENT)
                                       //`--------------------------'  `--------------------------'
@@ -30,11 +33,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // inspired by https://shop.keyboard.io/pages/the-atreus-layout
   [1] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-      XXXXXXX, KC_QUOT, KC_BSLS, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,    QK_BOOT, XXXXXXX,    KC_7,    KC_8,    KC_9, KC_MINS, XXXXXXX,
+           NA, KC_QUOT, KC_BSLS,      NA,      NA,      NA,      NA,    QK_BOOT,      NA,    KC_7,    KC_8,    KC_9, KC_MINS,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-      XXXXXXX, KC_LPRN, KC_RPRN, XXXXXXX, XXXXXXX, XXXXXXX, _______, C(G(KC_Q)), KC_LSFT,    KC_4,    KC_5,    KC_6,  KC_EQL, XXXXXXX,
+           NA, KC_LPRN, KC_RPRN,      NA,      NA,      NA, _______, C(G(KC_Q)), KC_LSFT,    KC_4,    KC_5,    KC_6,  KC_EQL,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-      XXXXXXX, KC_LBRC, KC_RBRC, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_BSPC,    KC_1,    KC_2,    KC_3,    KC_0, XXXXXXX,
+           NA, KC_LBRC, KC_RBRC,      NA,      NA,      NA,                      KC_BSPC,    KC_1,    KC_2,    KC_3,    KC_0,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    _______, _______, _______
                                       //`--------------------------'  `--------------------------'
@@ -43,11 +46,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // inspired by https://shop.keyboard.io/pages/the-atreus-layout
   [2] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-      XXXXXXX, _______, KC_HOME,   KC_UP,  KC_END, KC_PGUP, XXXXXXX,    XXXXXXX, XXXXXXX,   KC_F7,   KC_F8,   KC_F9,  KC_F10, XXXXXXX,
+           NA, _______, KC_HOME,   KC_UP,  KC_END, KC_PGUP,      NA,         NA,      NA,   KC_F7,   KC_F8,   KC_F9,  KC_F10,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-      XXXXXXX, KC_VOLU, KC_LEFT, KC_DOWN,KC_RIGHT, KC_PGDN, XXXXXXX,    XXXXXXX, XXXXXXX,   KC_F4,   KC_F5,   KC_F6,  KC_F11, XXXXXXX,
+           NA, KC_VOLU, KC_LEFT, KC_DOWN,KC_RIGHT, KC_PGDN,      NA,         NA,      NA,   KC_F4,   KC_F5,   KC_F6,  KC_F11,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-      XXXXXXX, KC_VOLD, QK_BOOT,  KC_SPC,  KC_ENT,  KC_GRV,                      XXXXXXX,   KC_F1,   KC_F2,   KC_F3,  KC_F12, XXXXXXX,
+           NA, KC_VOLD, QK_BOOT,  KC_SPC,  KC_ENT,  KC_GRV,                           NA,   KC_F1,   KC_F2,   KC_F3,  KC_F12,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    _______, _______, _______
                                       //`--------------------------'  `--------------------------'
