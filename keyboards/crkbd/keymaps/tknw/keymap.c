@@ -1,5 +1,13 @@
 #include QMK_KEYBOARD_H
 
+// ENT_SFT tap time threshold (ms)
+#define ENT_SFT_TAP_TERM 400
+
+// Custom keycodes
+enum custom_keycodes {
+    ENT_SFT = SAFE_RANGE
+};
+
 // Tap Dance declarations
 enum {
     TD_Q_ESC
@@ -14,7 +22,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
       XXXXXXX,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                          KC_LALT, KC_LCTL, KC_LGUI,    KC_RSFT,  KC_SPC,   MO(1)
+                                          KC_LALT, KC_LCTL, KC_LGUI,    ENT_SFT,  KC_SPC,   MO(1)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -67,6 +75,43 @@ void q_reset(tap_dance_state_t *state, void *user_data) {
 tap_dance_action_t tap_dance_actions[] = {
     [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset)
 };
+
+// Custom Enter/Shift key state tracking
+static bool custom_ent_shift_pressed = false;      // Is ENT_SFT currently held?
+static bool custom_ent_shift_shift_used = false;   // Was Shift used while ENT_SFT held?
+static uint16_t custom_ent_shift_timer = 0;        // Timer to track hold duration
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case ENT_SFT:
+            if (record->event.pressed) {
+                // Key pressed down
+                custom_ent_shift_pressed = true;
+                custom_ent_shift_shift_used = false;
+                custom_ent_shift_timer = timer_read();  // Record press time
+                register_code(KC_RSFT);  // Immediately activate Shift
+            } else {
+                // Key released
+                custom_ent_shift_pressed = false;
+                unregister_code(KC_RSFT);  // Deactivate Shift
+
+                // If no other key was pressed AND it was a short tap, send Enter
+                if (!custom_ent_shift_shift_used && timer_elapsed(custom_ent_shift_timer) < ENT_SFT_TAP_TERM) {
+                    tap_code(KC_ENT);
+                }
+            }
+            return false;  // Skip further processing
+
+        default:
+            // Any other key pressed while ENT_SFT is held
+            if (custom_ent_shift_pressed && record->event.pressed) {
+                custom_ent_shift_shift_used = true;
+            }
+            break;
+    }
+
+    return true;  // Continue normal processing for other keys
+}
 
 // Auto Shift: Enable only for specific symbol keys
 bool get_auto_shifted_key(uint16_t keycode, keyrecord_t *record) {
