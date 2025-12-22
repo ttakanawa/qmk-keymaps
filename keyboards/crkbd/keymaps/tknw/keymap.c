@@ -10,7 +10,8 @@ enum custom_keycodes {
 
 // Tap Dance declarations
 enum {
-    TD_Q_ESC
+    TD_Q_ESC,
+    TD_MO1_SHENT
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -22,7 +23,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
       XXXXXXX,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                          KC_LALT, KC_LCTL, KC_LGUI,    ENT_SFT,  KC_SPC,   MO(1)
+                                          KC_LALT, KC_LCTL, KC_LGUI,    ENT_SFT,  KC_SPC,TD(TD_MO1_SHENT)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -72,8 +73,29 @@ void q_reset(tap_dance_state_t *state, void *user_data) {
     }
 }
 
+void mo1_finished(tap_dance_state_t *state, void *user_data) {
+    if (state->count == 1) {
+        if (state->pressed) {
+            layer_on(1);  // Hold: Layer 1
+        }
+        // Single tap: do nothing special (just momentary layer)
+    } else if (state->count >= 2) {
+        // Double tap: Shift+Enter
+        register_code(KC_LSFT);
+        tap_code(KC_ENT);
+        unregister_code(KC_LSFT);
+    }
+}
+
+void mo1_reset(tap_dance_state_t *state, void *user_data) {
+    if (state->count == 1) {
+        layer_off(1);  // Release Layer 1
+    }
+}
+
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset)
+    [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset),
+    [TD_MO1_SHENT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo1_finished, mo1_reset)
 };
 
 // Custom Enter/Shift key state tracking
