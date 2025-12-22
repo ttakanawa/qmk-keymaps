@@ -79,3 +79,29 @@ void q_reset(tap_dance_state_t *state, void *user_data) {
 tap_dance_action_t tap_dance_actions[] = {
     [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset)
 };
+
+// Auto Shift: Enable only for specific symbol keys
+bool get_auto_shifted_key(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case KC_0:
+        case KC_1:
+        case KC_2:
+        case KC_3:
+        case KC_4:
+        case KC_5:
+        case KC_6:
+        case KC_7:
+        case KC_8:
+        case KC_9:
+        case KC_MINS:
+        case KC_EQL:
+        case KC_GRV:
+        case KC_LBRC:
+        case KC_RBRC:
+        case KC_QUOT:
+        case KC_BSLS:
+            return true;   // Enable auto-shift: long press applies Shift
+        default:
+            return false;  // Disable auto-shift for all other keys
+    }
+}
