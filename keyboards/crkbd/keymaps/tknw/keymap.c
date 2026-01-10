@@ -76,12 +76,17 @@ void q_reset(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void mo1_finished(tap_dance_state_t *state, void *user_data) {
+void mo1_each_tap(tap_dance_state_t *state, void *user_data) {
     if (state->count == 1) {
-        if (state->pressed) {
-            layer_on(1);  // Hold: Layer 1
-        }
-        // Single tap: do nothing special (just momentary layer)
+        layer_on(1);  // Turn on layer 1 immediately on first tap
+    } else {
+        layer_off(1);  // Turn off layer on double tap or more
+    }
+}
+
+void mo1_finished(tap_dance_state_t *state, void *user_data) {
+    if (state->count == 1 && !state->pressed) {
+        layer_off(1);  // Turn off layer if released after single tap
     } else if (state->count >= 2) {
         // Double tap: Shift+Enter
         register_code(KC_LSFT);
@@ -91,14 +96,12 @@ void mo1_finished(tap_dance_state_t *state, void *user_data) {
 }
 
 void mo1_reset(tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-        layer_off(1);  // Release Layer 1
-    }
+    layer_off(1);  // Always turn off layer 1
 }
 
 tap_dance_action_t tap_dance_actions[] = {
     [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset),
-    [TD_MO1_SHENT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo1_finished, mo1_reset)
+    [TD_MO1_SHENT] = ACTION_TAP_DANCE_FN_ADVANCED(mo1_each_tap, mo1_finished, mo1_reset)
 };
 
 // Custom Enter/Shift key state tracking
