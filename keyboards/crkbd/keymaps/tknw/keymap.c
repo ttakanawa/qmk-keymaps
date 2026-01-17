@@ -8,7 +8,8 @@
 
 // Custom keycodes
 enum custom_keycodes {
-    ENT_SFT = SAFE_RANGE
+    ENT_SFT = SAFE_RANGE,
+    ZERO_SFT
 };
 
 // Tap Dance declarations
@@ -37,7 +38,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
            NA, KC_LPRN, KC_RPRN,      NA,      NA,      NA, _______, C(G(KC_Q)), KC_LSFT,    KC_4,    KC_5,    KC_6,  KC_EQL,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, KC_LBRC, KC_RBRC,      NA,      NA,      NA,                      KC_BSPC,    KC_1,    KC_2,    KC_3, SFT_T(KC_0),  NA,
+           NA, KC_LBRC, KC_RBRC,      NA,      NA,      NA,                      KC_BSPC,    KC_1,    KC_2,    KC_3, ZERO_SFT,     NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    _______, _______, _______
                                       //`--------------------------'  `--------------------------'
@@ -109,6 +110,10 @@ static bool custom_ent_shift_pressed = false;      // Is ENT_SFT currently held?
 static bool custom_ent_shift_shift_used = false;   // Was Shift used while ENT_SFT held?
 static uint16_t custom_ent_shift_timer = 0;        // Timer to track hold duration
 
+// Custom Zero/Shift key state tracking
+static bool zero_sft_pressed = false;              // Is ZERO_SFT currently held?
+static bool zero_sft_shift_used = false;           // Was Shift used while ZERO_SFT held?
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case ENT_SFT:
@@ -130,10 +135,29 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;  // Skip further processing
 
+        case ZERO_SFT:
+            if (record->event.pressed) {
+                zero_sft_pressed = true;
+                zero_sft_shift_used = false;
+                register_code(KC_LSFT);
+            } else {
+                zero_sft_pressed = false;
+                unregister_code(KC_LSFT);
+                if (!zero_sft_shift_used) {
+                    tap_code(KC_0);
+                }
+            }
+            return false;
+
         default:
-            // Any other key pressed while ENT_SFT is held
-            if (custom_ent_shift_pressed && record->event.pressed) {
-                custom_ent_shift_shift_used = true;
+            // Any other key pressed while ENT_SFT or ZERO_SFT is held
+            if (record->event.pressed) {
+                if (custom_ent_shift_pressed) {
+                    custom_ent_shift_shift_used = true;
+                }
+                if (zero_sft_pressed) {
+                    zero_sft_shift_used = true;
+                }
             }
             break;
     }
