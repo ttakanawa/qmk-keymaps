@@ -113,6 +113,7 @@ static uint16_t custom_ent_shift_timer = 0;        // Timer to track hold durati
 // Custom Zero/Shift key state tracking
 static bool zero_sft_pressed = false;              // Is ZERO_SFT currently held?
 static bool zero_sft_shift_used = false;           // Was Shift used while ZERO_SFT held?
+static uint16_t zero_sft_timer = 0;                // Timer to track hold duration
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
@@ -139,11 +140,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (record->event.pressed) {
                 zero_sft_pressed = true;
                 zero_sft_shift_used = false;
+                zero_sft_timer = timer_read();
                 register_code(KC_LSFT);
             } else {
                 zero_sft_pressed = false;
                 unregister_code(KC_LSFT);
-                if (!zero_sft_shift_used) {
+                if (!zero_sft_shift_used && timer_elapsed(zero_sft_timer) < ENT_SFT_TAP_TERM) {
                     tap_code(KC_0);
                 }
             }
