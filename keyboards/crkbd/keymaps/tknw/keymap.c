@@ -34,11 +34,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // inspired by https://shop.keyboard.io/pages/the-atreus-layout
   [1] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA, KC_EXLM,   KC_AT, KC_HASH,      NA,      NA,      NA,    QK_BOOT,  KC_GRV,    KC_7,    KC_8,    KC_9, KC_MINS,      NA,
+           NA, KC_EXLM,   KC_AT, KC_HASH,      NA,      NA,      NA,    QK_BOOT,      NA,    KC_7,    KC_8,    KC_9, KC_MINS,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
            NA, KC_LPRN, KC_CIRC, KC_BSLS,  KC_DLR, KC_RPRN, _______,         NA, KC_BSPC,    KC_4,    KC_5,    KC_6,  KC_EQL,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, KC_LBRC, KC_RBRC, KC_QUOT, KC_LCBR, KC_RCBR,                    S(KC_SPC),    KC_1,    KC_2,    KC_3, ZERO_SFT,     NA,
+           NA, KC_LBRC, KC_RBRC, KC_QUOT, KC_LCBR, KC_RCBR,                       KC_GRV,    KC_1,    KC_2,    KC_3, ZERO_SFT,     NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    _______, _______, _______
                                       //`--------------------------'  `--------------------------'
