@@ -1,5 +1,9 @@
 #pragma once
 
+// Mouse keys - slower cursor
+#define MOUSEKEY_MOVE_DELTA 1
+#define MOUSEKEY_TIME_TO_MAX 60
+
 // RGB Matrix - disabled on startup
 #define RGB_MATRIX_DEFAULT_ON false
 // Default effect (solid color only)
