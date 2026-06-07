@@ -9,7 +9,8 @@
 // Custom keycodes
 enum custom_keycodes {
     ENT_SFT = SAFE_RANGE,
-    ZERO_SFT
+    ZERO_SFT,
+    SLSH_SFT
 };
 
 // Tap Dance declarations
@@ -25,7 +26,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
            NA,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G, KC_LSFT,         NA,    KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,      NA,
+           NA,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, SLSH_SFT,     NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           KC_LOPT, KC_LCTL, KC_LCMD,    ENT_SFT,  KC_SPC,TD(TD_MO1_SHENT)
                                       //`--------------------------'  `--------------------------'
@@ -128,7 +129,29 @@ static bool zero_sft_pressed = false;              // Is ZERO_SFT currently held
 static bool zero_sft_shift_used = false;           // Was Shift used while ZERO_SFT held?
 static uint16_t zero_sft_timer = 0;                // Timer to track hold duration
 
+// Custom Slash/Shift key state tracking
+static bool slsh_sft_pressed = false;              // Is SLSH_SFT currently held?
+static bool slsh_sft_shift_used = false;           // Was Shift used while SLSH_SFT held?
+static bool slsh_sft_shifted_tap = false;          // Should a tap send shifted Slash?
+static uint16_t slsh_sft_timer = 0;                // Timer to track hold duration
+
+static void mark_shift_tap_used_by(uint16_t keycode) {
+    if (custom_ent_shift_pressed && keycode != ENT_SFT) {
+        custom_ent_shift_shift_used = true;
+    }
+    if (zero_sft_pressed && keycode != ZERO_SFT) {
+        zero_sft_shift_used = true;
+    }
+    if (slsh_sft_pressed && keycode != SLSH_SFT) {
+        slsh_sft_shift_used = true;
+    }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (record->event.pressed) {
+        mark_shift_tap_used_by(keycode);
+    }
+
     switch (keycode) {
         case ENT_SFT:
             if (record->event.pressed) {
@@ -164,16 +187,28 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
 
-        default:
-            // Any other key pressed while ENT_SFT or ZERO_SFT is held
+        case SLSH_SFT:
             if (record->event.pressed) {
-                if (custom_ent_shift_pressed) {
-                    custom_ent_shift_shift_used = true;
+                slsh_sft_pressed = true;
+                slsh_sft_shift_used = false;
+                slsh_sft_shifted_tap = custom_ent_shift_pressed || zero_sft_pressed;
+                slsh_sft_timer = timer_read();
+                register_code(KC_LSFT);
+            } else {
+                slsh_sft_pressed = false;
+                unregister_code(KC_LSFT);
+                if (!slsh_sft_shift_used && timer_elapsed(slsh_sft_timer) < ENT_SFT_TAP_TERM) {
+                    if (slsh_sft_shifted_tap) {
+                        tap_code16(KC_QUES);
+                    } else {
+                        tap_code(KC_SLSH);
+                    }
                 }
-                if (zero_sft_pressed) {
-                    zero_sft_shift_used = true;
-                }
+                slsh_sft_shifted_tap = false;
             }
+            return false;
+
+        default:
             break;
     }
 
