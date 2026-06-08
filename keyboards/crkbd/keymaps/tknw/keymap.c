@@ -10,7 +10,8 @@
 enum custom_keycodes {
     ENT_SFT = SAFE_RANGE,
     ZERO_SFT,
-    SLSH_SFT
+    SLSH_SFT,
+    LOPT_ENG
 };
 
 // Tap Dance declarations
@@ -28,7 +29,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, SLSH_SFT,     NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                          KC_LOPT, KC_LCTL, KC_LCMD,    ENT_SFT,  KC_SPC,TD(TD_MO1_SHENT)
+                                          LOPT_ENG, KC_LCTL, KC_LCMD,    ENT_SFT,  KC_SPC,TD(TD_MO1_SHENT)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -101,7 +102,8 @@ void mo1_each_tap(tap_dance_state_t *state, void *user_data) {
 
 void mo1_finished(tap_dance_state_t *state, void *user_data) {
     if (state->count == 1 && !state->pressed) {
-        layer_off(1);  // Turn off layer if released after single tap
+        layer_off(1);  // Turn off layer
+        tap_code(KC_LNG1);  // Single tap: switch to Japanese input
     } else if (state->count >= 2) {
         // Double tap: Shift+Enter
         register_code(KC_LSFT);
@@ -135,6 +137,11 @@ static bool slsh_sft_shift_used = false;           // Was Shift used while SLSH_
 static bool slsh_sft_shifted_tap = false;          // Should a tap send shifted Slash?
 static uint16_t slsh_sft_timer = 0;                // Timer to track hold duration
 
+// Custom LOPT/English key state tracking
+static bool lopt_eng_pressed = false;              // Is LOPT_ENG currently held?
+static bool lopt_eng_used = false;                 // Was LOPT used while LOPT_ENG held?
+static uint16_t lopt_eng_timer = 0;                // Timer to track hold duration
+
 static void mark_shift_tap_used_by(uint16_t keycode) {
     if (custom_ent_shift_pressed && keycode != ENT_SFT) {
         custom_ent_shift_shift_used = true;
@@ -144,6 +151,9 @@ static void mark_shift_tap_used_by(uint16_t keycode) {
     }
     if (slsh_sft_pressed && keycode != SLSH_SFT) {
         slsh_sft_shift_used = true;
+    }
+    if (lopt_eng_pressed && keycode != LOPT_ENG) {
+        lopt_eng_used = true;
     }
 }
 
@@ -205,6 +215,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     }
                 }
                 slsh_sft_shifted_tap = false;
+            }
+            return false;
+
+        case LOPT_ENG:
+            if (record->event.pressed) {
+                lopt_eng_pressed = true;
+                lopt_eng_used = false;
+                lopt_eng_timer = timer_read();
+                register_code(KC_LOPT);
+            } else {
+                lopt_eng_pressed = false;
+                unregister_code(KC_LOPT);
+                if (!lopt_eng_used && timer_elapsed(lopt_eng_timer) < ENT_SFT_TAP_TERM) {
+                    tap_code(KC_LNG2);  // Switch to English input
+                }
             }
             return false;
 
