@@ -6,12 +6,19 @@
 // ENT_SFT tap time threshold (ms)
 #define ENT_SFT_TAP_TERM 400
 
+// SPC_SFT hold threshold (ms) — shift activates via matrix_scan after this delay
+#define SPC_SFT_HOLD_TERM 200
+// SPC_SFT rollover window (ms) — if a key was released within this time before
+// SPC_SFT was pressed, treat as typing rollover (send space, not shift).
+#define SPC_SFT_ROLLOVER_WINDOW 100
+
 // Custom keycodes
 enum custom_keycodes {
     ENT_SFT = SAFE_RANGE,
     ZERO_SFT,
     SCLN_SFT,
-    LOPT_ENG
+    LOPT_ENG,
+    SPC_SFT
 };
 
 // Tap Dance declarations
@@ -25,11 +32,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
       NA, TD(TD_Q_ESC),    KC_W,    KC_E,    KC_R,    KC_T,  KC_TAB,    RM_TOGG,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-           NA,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G, KC_LSFT,         NA,    KC_H,    KC_J,    KC_K,    KC_L, SCLN_SFT,     NA,
+           NA,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G, KC_LSFT,         NA,    KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                          LOPT_ENG, KC_LCTL, KC_LCMD,    ENT_SFT,  KC_SPC,TD(TD_MO1_SHENT)
+                                          LOPT_ENG, KC_LCTL, KC_LCMD,    ENT_SFT,SPC_SFT,TD(TD_MO1_SHENT)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -142,6 +149,17 @@ static bool lopt_eng_pressed = false;              // Is LOPT_ENG currently held
 static bool lopt_eng_used = false;                 // Was LOPT used while LOPT_ENG held?
 static uint16_t lopt_eng_timer = 0;                // Timer to track hold duration
 
+// Custom Space/Shift key state tracking
+static bool spc_sft_pressed = false;               // Is SPC_SFT currently held (custom logic)?
+static bool spc_sft_shift_registered = false;      // Has Shift been registered?
+static bool spc_sft_rollover = false;              // Was this likely a typing rollover?
+static bool spc_sft_passthrough = false;           // Passthrough mode (modifier held → normal space)
+static uint16_t spc_sft_timer = 0;                 // Timer to track hold duration
+
+// Global state for SPC_SFT rollover detection
+static uint8_t held_keys = 0;                      // Number of currently held keys
+static uint16_t last_key_release_time = 0;         // Timestamp of last key release
+
 static void mark_shift_tap_used_by(uint16_t keycode) {
     if (custom_ent_shift_pressed && keycode != ENT_SFT) {
         custom_ent_shift_shift_used = true;
@@ -158,8 +176,31 @@ static void mark_shift_tap_used_by(uint16_t keycode) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    // Track held keys and release timing for SPC_SFT rollover detection
+    if (record->event.pressed) {
+        held_keys++;
+    } else {
+        if (held_keys > 0) held_keys--;
+        last_key_release_time = timer_read();
+    }
+
     if (record->event.pressed) {
         mark_shift_tap_used_by(keycode);
+
+        // SPC_SFT resolution when another key is pressed.
+        // Only applies to basic keycodes (letters, numbers, etc.) — skip modifiers
+        // and custom keycodes so that Ctrl+Space, Option+Space, etc. work normally.
+        if (spc_sft_pressed && keycode < KC_LCTL && !spc_sft_shift_registered) {
+            if (spc_sft_rollover) {
+                // Typing rollover — resolve as tap (send space)
+                spc_sft_pressed = false;
+                tap_code(KC_SPC);
+            } else {
+                // Intentional shift — activate before target key is processed
+                register_code(KC_LSFT);
+                spc_sft_shift_registered = true;
+            }
+        }
     }
 
     switch (keycode) {
@@ -233,9 +274,49 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
 
+        case SPC_SFT:
+            if (record->event.pressed) {
+                if (get_mods()) {
+                    // Modifier already held (e.g., Ctrl+Space) — passthrough as normal space
+                    spc_sft_passthrough = true;
+                    register_code(KC_SPC);
+                } else {
+                    spc_sft_pressed = true;
+                    spc_sft_shift_registered = false;
+                    // Detect typing rollover: another key is still held OR a key was
+                    // released very recently (before the user's finger reached space).
+                    spc_sft_rollover = (held_keys > 1) ||
+                                       (timer_elapsed(last_key_release_time) < SPC_SFT_ROLLOVER_WINDOW);
+                    spc_sft_timer = timer_read();
+                }
+            } else {
+                if (spc_sft_passthrough) {
+                    unregister_code(KC_SPC);
+                    spc_sft_passthrough = false;
+                } else if (spc_sft_pressed) {
+                    if (spc_sft_shift_registered) {
+                        unregister_code(KC_LSFT);
+                    } else {
+                        // Released without shift being used — tap: send space
+                        tap_code(KC_SPC);
+                    }
+                    spc_sft_pressed = false;
+                }
+            }
+            return false;
+
         default:
             break;
     }
 
     return true;  // Continue normal processing for other keys
+}
+
+void matrix_scan_user(void) {
+    // Register shift after hold threshold if no key has been pressed yet
+    // (e.g., user is holding SPC_SFT in preparation for a shifted key).
+    if (spc_sft_pressed && !spc_sft_shift_registered && timer_elapsed(spc_sft_timer) >= SPC_SFT_HOLD_TERM) {
+        register_code(KC_LSFT);
+        spc_sft_shift_registered = true;
+    }
 }
