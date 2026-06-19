@@ -69,11 +69,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // Window management & mouse keys
   [3] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA, _______,_______,LSG(KC_LBRC),LSG(KC_RCBR),MS_WHLD,NA,         NA, MS_WHLR,      NA,      NA, MS_WHLL,      NA,      NA,
+           NA, _______,_______,    MS_UP,     NA,  MS_WHLD,      NA,         NA, MS_WHLR,      NA,      NA, MS_WHLL,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-           NA,      NA,      NA, G(KC_1), G(KC_2), MS_WHLU, _______,         NA, MS_LEFT, MS_DOWN,   MS_UP, MS_RGHT,      NA,      NA,
+           NA,      NA, MS_LEFT, MS_DOWN, MS_RGHT, MS_WHLU, _______,         NA, MS_LEFT, MS_DOWN,   MS_UP, MS_RGHT,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA,      NA,      NA, G(KC_3), G(KC_4), G(KC_5),                           NA,      NA,      NA,      NA,      NA,      NA,
+           NA,LSG(KC_LBRC), LSG(KC_RCBR), G(KC_1), G(KC_2), G(KC_3),                  NA,      NA,      NA,      NA,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           G(KC_9), MS_BTN2, MS_BTN1,    MS_BTN1, MS_BTN2, _______
                                       //`--------------------------'  `--------------------------'
