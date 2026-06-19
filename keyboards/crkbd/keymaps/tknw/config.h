@@ -1,8 +1,9 @@
 #pragma once
 
-// Mouse keys - slower cursor
-#define MOUSEKEY_MOVE_DELTA 1
-#define MOUSEKEY_TIME_TO_MAX 60
+// Mouse keys - gentle acceleration
+#define MOUSEKEY_MOVE_DELTA 3
+#define MOUSEKEY_MAX_SPEED 5
+#define MOUSEKEY_TIME_TO_MAX 35
 
 // RGB Matrix - disabled on startup
 #define RGB_MATRIX_DEFAULT_ON false
