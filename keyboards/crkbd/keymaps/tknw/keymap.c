@@ -24,7 +24,8 @@ enum custom_keycodes {
 // Tap Dance declarations
 enum {
     TD_Q_ESC,
-    TD_MO1_SHENT
+    TD_MO1_SHENT,
+    TD_COMM_DOT
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -43,11 +44,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // inspired by https://shop.keyboard.io/pages/the-atreus-layout
   [1] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA, KC_EXLM,   KC_AT, KC_HASH,      NA,      NA,      NA,    QK_BOOT,      NA,    KC_7,    KC_8,    KC_9, KC_MINS,      NA,
+           NA, KC_EXLM,   KC_AT, KC_HASH,  KC_GRV,      NA,      NA,    QK_BOOT,      NA,    KC_7,    KC_8,    KC_9, KC_MINS,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
            NA, KC_LPRN, KC_CIRC, KC_BSLS,  KC_DLR, KC_RPRN, _______,         NA, KC_BSPC,    KC_4,    KC_5,    KC_6,  KC_EQL,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, KC_LBRC, KC_RBRC, KC_QUOT, KC_LCBR, KC_RCBR,                       KC_GRV,    KC_1,    KC_2,    KC_3, ZERO_SFT,     NA,
+           NA, KC_LBRC, KC_RBRC, KC_QUOT, KC_LCBR, KC_RCBR,              TD(TD_COMM_DOT),    KC_1,    KC_2,    KC_3, ZERO_SFT,     NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    _______, _______, _______
                                       //`--------------------------'  `--------------------------'
@@ -125,7 +126,8 @@ void mo1_reset(tap_dance_state_t *state, void *user_data) {
 
 tap_dance_action_t tap_dance_actions[] = {
     [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset),
-    [TD_MO1_SHENT] = ACTION_TAP_DANCE_FN_ADVANCED(mo1_each_tap, mo1_finished, mo1_reset)
+    [TD_MO1_SHENT] = ACTION_TAP_DANCE_FN_ADVANCED(mo1_each_tap, mo1_finished, mo1_reset),
+    [TD_COMM_DOT] = ACTION_TAP_DANCE_DOUBLE(KC_COMM, KC_DOT)
 };
 
 // Custom Enter/Shift key state tracking
