@@ -5,6 +5,10 @@
 #define MOUSEKEY_MAX_SPEED 5
 #define MOUSEKEY_TIME_TO_MAX 35
 
+// Tap-hold keys become hold as soon as another key is pressed, except where
+// get_hold_on_other_key_press() opts out.
+#define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
+
 // RGB Matrix - disabled on startup
 #define RGB_MATRIX_DEFAULT_ON false
 // Default effect (solid color only)
