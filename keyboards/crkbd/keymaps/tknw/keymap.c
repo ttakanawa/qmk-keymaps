@@ -1,82 +1,99 @@
+#include "keycodes.h"
 #include QMK_KEYBOARD_H
 
 // Define NA for unused keys
 #define NA XXXXXXX
 
-// ENT_SFT tap time threshold (ms)
+// LOPT_TAB tap time threshold (ms)
+#define LOPT_TAB_TAP_TERM 400
+#define LOPT_TAB_DEFER_TERM 10
 #define ENT_SFT_TAP_TERM 400
 
-// SPC_SFT hold threshold (ms) — shift activates via matrix_scan after this delay
-#define SPC_SFT_HOLD_TERM 200
-// SPC_SFT rollover window (ms) — if a key was released within this time before
-// SPC_SFT was pressed, treat as typing rollover (send space, not shift).
-#define SPC_SFT_ROLLOVER_WINDOW 100
+// Layers
+enum layers {
+    BASE,
+    NAV,
+    NUM,
+    FUN,
+    MOUSE
+};
 
 // Custom keycodes
 enum custom_keycodes {
     ENT_SFT = SAFE_RANGE,
-    ZERO_SFT,
-    SCLN_SFT,
-    LOPT_ENG,
-    SPC_SFT
+    LOPT_TAB,
+    SLSH_SFT,
+    SCLN_FUN
 };
 
 // Tap Dance declarations
 enum {
     TD_Q_ESC,
-    TD_MO1_SHENT,
-    TD_COMM_DOT
+    TD_NUM_SHENT
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-  [0] = LAYOUT_split_3x6_3_ex2(
+  [BASE] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-      NA, TD(TD_Q_ESC),    KC_W,    KC_E,    KC_R,    KC_T,  KC_TAB,    RM_TOGG,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
+      NA, TD(TD_Q_ESC),    KC_W,    KC_E,    KC_R,    KC_T,      NA,         NA,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-           NA,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G, KC_LSFT,         NA,    KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN,      NA,
+           NA,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,      NA,         NA,    KC_H,    KC_J,    KC_K,    KC_L,SCLN_FUN,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,      NA,
+           NA,LSFT_T(KC_Z),KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SLSH_SFT,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                          LOPT_ENG, KC_LCTL, KC_LCMD,    ENT_SFT,SPC_SFT,TD(TD_MO1_SHENT)
+                                    LOPT_TAB,LCTL_T(KC_LNG2),KC_LCMD,    ENT_SFT,KC_SPC,TD(TD_NUM_SHENT)
                                       //`--------------------------'  `--------------------------'
   ),
 
-  // inspired by https://shop.keyboard.io/pages/the-atreus-layout
-  [1] = LAYOUT_split_3x6_3_ex2(
+  // Cursor navigation and window controls
+  [NAV] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA, KC_EXLM,   KC_AT, KC_HASH,  KC_GRV,      NA,      NA,    QK_BOOT,      NA,    KC_7,    KC_8,    KC_9, KC_MINS,      NA,
-  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-           NA, KC_LPRN, KC_CIRC, KC_BSLS,  KC_DLR, KC_RPRN, _______,         NA, KC_BSPC,    KC_4,    KC_5,    KC_6,  KC_EQL,      NA,
+           NA, _______, G(KC_LCBR), KC_UP,G(KC_RCBR),KC_PGUP,      NA,       NA,      NA,      NA,      NA,      NA,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, KC_LBRC, KC_RBRC, KC_QUOT, KC_LCBR, KC_RCBR,              TD(TD_COMM_DOT),    KC_1,    KC_2,    KC_3, ZERO_SFT,     NA,
+           NA, LT(MOUSE, KC_VOLU),KC_LEFT,KC_DOWN,KC_RIGHT,KC_PGDN,NA,       NA,      NA,      NA,      NA,      NA,      NA,      NA,
+  //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
+           NA, KC_VOLD,      NA,  KC_SPC,  KC_ENT,G(KC_GRV),                          NA,      NA,      NA,      NA, KC_RSFT,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    _______, _______, _______
                                       //`--------------------------'  `--------------------------'
   ),
 
-  // inspired by https://shop.keyboard.io/pages/the-atreus-layout
-  [2] = LAYOUT_split_3x6_3_ex2(
+  // Number and Symbols
+  [NUM] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA, _______,    MO(3),  KC_UP,      NA, KC_PGUP, QK_BOOT,         NA,      NA,   KC_F7,   KC_F8,   KC_F9,  KC_F10,      NA,
-  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+----- ---+--------|
-           NA, KC_VOLU, KC_LEFT, KC_DOWN,KC_RIGHT, KC_PGDN, _______,         NA,      NA,   KC_F4,   KC_F5,   KC_F6,  KC_F11,      NA,
+           NA,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,      NA,         NA,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, KC_VOLD,       NA, KC_SPC,  KC_ENT,G(KC_GRV),                          NA,   KC_F1,   KC_F2,   KC_F3,  KC_F12,      NA,
+           NA, KC_LPRN,      NA,      NA,      NA, KC_RPRN,      NA,         NA, KC_BSPC, KC_MINS,  KC_EQL,  KC_GRV, KC_QUOT,      NA,
+  //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
+           NA, KC_LSFT,      NA,      NA,      NA,      NA,                      KC_LBRC, KC_RBRC, KC_CIRC, KC_DLR,RSFT_T(KC_BSLS),NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    _______, _______, _______
                                       //`--------------------------'  `--------------------------'
   ),
 
-  // Window management & mouse keys
-  [3] = LAYOUT_split_3x6_3_ex2(
+  // Function keys
+  [FUN] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA, _______,_______,    MS_UP,     NA,  MS_WHLD,      NA,         NA, MS_WHLR,      NA,      NA, MS_WHLL,      NA,      NA,
-  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-           NA,      NA, MS_LEFT, MS_DOWN, MS_RGHT, MS_WHLU, _______,         NA, MS_LEFT, MS_DOWN,   MS_UP, MS_RGHT,      NA,      NA,
+           NA,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,      NA,         NA,   KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, G(KC_1), G(KC_2), G(KC_3),LSG(KC_LBRC),LSG(KC_RCBR),                   NA,      NA,      NA,      NA,      NA,      NA,
+           NA,      NA,      NA,      NA,      NA,      NA,      NA,         NA, KC_VOLD, KC_VOLU,  KC_F11,  KC_F12, _______,      NA,
+  //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
+           NA, KC_LSFT,      NA,      NA,      NA,      NA,                      RM_TOGG,      NA,      NA,      NA, QK_BOOT,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                          G(KC_9), MS_BTN2, MS_BTN1,    MS_BTN1, MS_BTN2, _______
+                                          _______, _______, _______,    _______, _______, _______
+                                      //`--------------------------'  `--------------------------'
+  ),
+
+  // Mouse keys
+  [MOUSE] = LAYOUT_split_3x6_3_ex2(
+  //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
+           NA, _______,      NA,   MS_UP,      NA, MS_WHLD,      NA,         NA,      NA,      NA,      NA,      NA,      NA,      NA,
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+           NA, _______, MS_LEFT, MS_DOWN, MS_RGHT, MS_WHLU,      NA,         NA, MS_LEFT, MS_DOWN,   MS_UP, MS_RGHT,      NA,      NA,
+  //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
+           NA, QK_BOOT, MS_WHLR,      NA, MS_WHLL,      NA,                           NA,      NA,      NA,      NA,      NA,      NA,
+  //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
+                                               NA, MS_BTN2, MS_BTN1,    MS_BTN1, MS_BTN2, _______
                                       //`--------------------------'  `--------------------------'
   )
 };
@@ -85,7 +102,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 void q_finished(tap_dance_state_t *state, void *user_data) {
     if (state->count == 1) {
         if (state->pressed) {
-            layer_on(2);  // Hold: Layer 2
+            layer_on(NAV);  // Hold: enable NAV
         } else {
             tap_code(KC_Q);  // Single tap: Q
         }
@@ -96,214 +113,260 @@ void q_finished(tap_dance_state_t *state, void *user_data) {
 
 void q_reset(tap_dance_state_t *state, void *user_data) {
     if (state->count == 1) {
-        layer_off(2);  // Release Layer 2
+        layer_off(NAV);  // Release: disable NAV
     }
 }
 
-void mo1_each_tap(tap_dance_state_t *state, void *user_data) {
+void num_each_tap(tap_dance_state_t *state, void *user_data) {
     if (state->count == 1) {
-        layer_on(1);  // Turn on layer 1 immediately on first tap
+        layer_on(NUM);
     } else {
-        layer_off(1);  // Turn off layer on double tap or more
+        layer_off(NUM);
     }
 }
 
-void mo1_finished(tap_dance_state_t *state, void *user_data) {
+void num_finished(tap_dance_state_t *state, void *user_data) {
     if (state->count == 1 && !state->pressed) {
-        layer_off(1);  // Turn off layer
-        tap_code(KC_LNG1);  // Single tap: switch to Japanese input
+        layer_off(NUM);
+        tap_code(KC_LNG1);
     } else if (state->count >= 2) {
-        // Double tap: Shift+Enter
         register_code(KC_LSFT);
         tap_code(KC_ENT);
         unregister_code(KC_LSFT);
     }
 }
 
-void mo1_reset(tap_dance_state_t *state, void *user_data) {
-    layer_off(1);  // Always turn off layer 1
+void num_reset(tap_dance_state_t *state, void *user_data) {
+    layer_off(NUM);
 }
 
 tap_dance_action_t tap_dance_actions[] = {
     [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset),
-    [TD_MO1_SHENT] = ACTION_TAP_DANCE_FN_ADVANCED(mo1_each_tap, mo1_finished, mo1_reset),
-    [TD_COMM_DOT] = ACTION_TAP_DANCE_DOUBLE(KC_COMM, KC_DOT)
+    [TD_NUM_SHENT] = ACTION_TAP_DANCE_FN_ADVANCED(num_each_tap, num_finished, num_reset)
 };
 
 // Custom Enter/Shift key state tracking
-static bool custom_ent_shift_pressed = false;      // Is ENT_SFT currently held?
-static bool custom_ent_shift_shift_used = false;   // Was Shift used while ENT_SFT held?
-static uint16_t custom_ent_shift_timer = 0;        // Timer to track hold duration
+static bool custom_ent_shift_pressed = false;
+static bool custom_ent_shift_shift_used = false;
+static uint16_t custom_ent_shift_timer = 0;
 
-// Custom Zero/Shift key state tracking
-static bool zero_sft_pressed = false;              // Is ZERO_SFT currently held?
-static bool zero_sft_shift_used = false;           // Was Shift used while ZERO_SFT held?
-static uint16_t zero_sft_timer = 0;                // Timer to track hold duration
+// Custom LOPT/Tab key state tracking
+static bool lopt_tab_pressed = false;              // Is LOPT_TAB currently held?
+static bool lopt_tab_used = false;                 // Was LOPT used while LOPT_TAB held?
+static uint16_t lopt_tab_timer = 0;                // Timer to track hold duration
+static bool lopt_tab_tap_pending = false;
+static bool lopt_tab_tap_sent = false;
+static uint16_t lopt_tab_tap_timer = 0;
 
-// Custom Semicolon/Shift key state tracking
-static bool scln_sft_pressed = false;              // Is SCLN_SFT currently held?
-static bool scln_sft_shift_used = false;           // Was Shift used while SCLN_SFT held?
-static bool scln_sft_shifted_tap = false;          // Should a tap send shifted Semicolon?
-static uint16_t scln_sft_timer = 0;                // Timer to track hold duration
+// Custom Slash/Shift key state tracking
+static bool slsh_sft_pressed = false;
+static bool slsh_sft_used = false;
+static bool slsh_sft_tap_sent = false;
+static bool slsh_sft_shift_registered = false;
+static uint16_t slsh_sft_timer = 0;
 
-// Custom LOPT/English key state tracking
-static bool lopt_eng_pressed = false;              // Is LOPT_ENG currently held?
-static bool lopt_eng_used = false;                 // Was LOPT used while LOPT_ENG held?
-static uint16_t lopt_eng_timer = 0;                // Timer to track hold duration
+// Custom Semicolon/Function layer key state tracking
+static bool scln_fun_pressed = false;
+static bool scln_fun_used = false;
+static bool scln_fun_tap_sent = false;
+static bool scln_fun_layer_enabled = false;
+static uint16_t scln_fun_timer = 0;
 
-// Custom Space/Shift key state tracking
-static bool spc_sft_pressed = false;               // Is SPC_SFT currently held (custom logic)?
-static bool spc_sft_shift_registered = false;      // Has Shift been registered?
-static bool spc_sft_rollover = false;              // Was this likely a typing rollover?
-static bool spc_sft_passthrough = false;           // Passthrough mode (modifier held → normal space)
-static uint16_t spc_sft_timer = 0;                 // Timer to track hold duration
-
-// Global state for SPC_SFT rollover detection
-static uint8_t held_keys = 0;                      // Number of currently held keys
-static uint16_t last_key_release_time = 0;         // Timestamp of last key release
-
-static void mark_shift_tap_used_by(uint16_t keycode) {
+static void mark_ent_sft_used_by(uint16_t keycode) {
     if (custom_ent_shift_pressed && keycode != ENT_SFT) {
         custom_ent_shift_shift_used = true;
     }
-    if (zero_sft_pressed && keycode != ZERO_SFT) {
-        zero_sft_shift_used = true;
-    }
-    if (scln_sft_pressed && keycode != SCLN_SFT) {
-        scln_sft_shift_used = true;
-    }
-    if (lopt_eng_pressed && keycode != LOPT_ENG) {
-        lopt_eng_used = true;
+}
+
+static void mark_key_used_by(uint16_t keycode, bool pressed, uint16_t self_keycode, bool *used) {
+    if (pressed && keycode != self_keycode && !IS_MODIFIER_KEYCODE(keycode)) {
+        *used = true;
     }
 }
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    // Track held keys and release timing for SPC_SFT rollover detection
+static void register_slsh_sft_shift(void) {
+    if (!slsh_sft_shift_registered) {
+        register_code(KC_RSFT);
+        slsh_sft_shift_registered = true;
+    }
+}
+
+static void mark_slsh_sft_used_by(uint16_t keycode) {
+    if (!slsh_sft_pressed || keycode == SLSH_SFT) {
+        return;
+    }
+
+    slsh_sft_used = true;
+    if (keycode == ENT_SFT) {
+        if (slsh_sft_shift_registered) {
+            unregister_code(KC_RSFT);
+            slsh_sft_shift_registered = false;
+        }
+    } else if (!slsh_sft_tap_sent && !IS_MODIFIER_KEYCODE(keycode)) {
+        register_slsh_sft_shift();
+    }
+}
+
+static void enable_scln_fun_layer(void) {
+    if (!scln_fun_layer_enabled) {
+        layer_on(FUN);
+        scln_fun_layer_enabled = true;
+    }
+}
+
+static void disable_scln_fun_layer(void) {
+    if (scln_fun_layer_enabled) {
+        layer_off(FUN);
+        scln_fun_layer_enabled = false;
+    }
+}
+
+static bool is_modifier_release_key(uint16_t keycode, keyrecord_t *record) {
     if (record->event.pressed) {
-        held_keys++;
-    } else {
-        if (held_keys > 0) held_keys--;
-        last_key_release_time = timer_read();
+        return false;
+    }
+
+    if (IS_MODIFIER_KEYCODE(keycode)) {
+        return true;
+    }
+
+    return IS_QK_MOD_TAP(keycode) && record->tap.count == 0;
+}
+
+static bool is_tap_uninterrupted(bool used, bool tap_sent, uint16_t timer, uint16_t term) {
+    return !used && !tap_sent && timer_elapsed(timer) < term;
+}
+
+static bool tap_shifted_if_needed(uint16_t keycode, bool *used, bool *tap_sent) {
+    if (!(custom_ent_shift_pressed || (get_mods() & MOD_MASK_SHIFT))) {
+        return false;
+    }
+
+    tap_code16(keycode);
+    *used = true;
+    *tap_sent = true;
+    if (custom_ent_shift_pressed) {
+        custom_ent_shift_shift_used = true;
+    }
+    return true;
+}
+
+static void send_lopt_tab_tap(void) {
+    tap_code(KC_TAB);
+    lopt_tab_tap_pending = false;
+    lopt_tab_tap_sent = true;
+    lopt_tab_used = true;
+}
+
+bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
+    (void)record;
+
+    return keycode != LSFT_T(KC_Z);
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (lopt_tab_pressed && !lopt_tab_used && !lopt_tab_tap_sent && is_modifier_release_key(keycode, record) &&
+        timer_elapsed(lopt_tab_timer) < LOPT_TAB_TAP_TERM) {
+        unregister_code(KC_LOPT);
+        send_lopt_tab_tap();
+    }
+
+    if (lopt_tab_tap_pending) {
+        if (is_modifier_release_key(keycode, record)) {
+            // Send Tab before modifier release is processed, preserving modifier+Tab.
+            send_lopt_tab_tap();
+        } else if (record->event.pressed && !IS_MODIFIER_KEYCODE(keycode)) {
+            send_lopt_tab_tap();
+        }
     }
 
     if (record->event.pressed) {
-        mark_shift_tap_used_by(keycode);
-
-        // SPC_SFT resolution when another key is pressed.
-        // Only applies to basic keycodes (letters, numbers, etc.) — skip modifiers
-        // and custom keycodes so that Ctrl+Space, Option+Space, etc. work normally.
-        if (spc_sft_pressed && keycode < KC_LCTL && !spc_sft_shift_registered) {
-            if (spc_sft_rollover) {
-                // Typing rollover — resolve as tap (send space)
-                spc_sft_pressed = false;
-                tap_code(KC_SPC);
-            } else {
-                // Intentional shift — activate before target key is processed
-                register_code(KC_LSFT);
-                spc_sft_shift_registered = true;
-            }
-        }
+        mark_ent_sft_used_by(keycode);
+        mark_slsh_sft_used_by(keycode);
+        mark_key_used_by(keycode, scln_fun_pressed, SCLN_FUN, &scln_fun_used);
+        mark_key_used_by(keycode, lopt_tab_pressed, LOPT_TAB, &lopt_tab_used);
     }
 
     switch (keycode) {
         case ENT_SFT:
             if (record->event.pressed) {
-                // Key pressed down
-                custom_ent_shift_pressed = true;
-                custom_ent_shift_shift_used = false;
-                custom_ent_shift_timer = timer_read();  // Record press time
-                register_code(KC_RSFT);  // Immediately activate Shift
-            } else {
-                // Key released
-                custom_ent_shift_pressed = false;
-                unregister_code(KC_RSFT);  // Deactivate Shift
+                bool slsh_sft_chord = slsh_sft_pressed && !slsh_sft_tap_sent;
 
-                // If no other key was pressed AND it was a short tap, send Enter
+                custom_ent_shift_pressed = true;
+                custom_ent_shift_shift_used = slsh_sft_chord;
+                custom_ent_shift_timer = timer_read();
+                register_code(KC_RSFT);
+                if (slsh_sft_chord) {
+                    tap_code(KC_ENT);
+                }
+            } else {
+                custom_ent_shift_pressed = false;
+                unregister_code(KC_RSFT);
                 if (!custom_ent_shift_shift_used && timer_elapsed(custom_ent_shift_timer) < ENT_SFT_TAP_TERM) {
                     tap_code(KC_ENT);
                 }
             }
-            return false;  // Skip further processing
-
-        case ZERO_SFT:
-            if (record->event.pressed) {
-                zero_sft_pressed = true;
-                zero_sft_shift_used = false;
-                zero_sft_timer = timer_read();
-                register_code(KC_LSFT);
-            } else {
-                zero_sft_pressed = false;
-                unregister_code(KC_LSFT);
-                if (!zero_sft_shift_used && timer_elapsed(zero_sft_timer) < ENT_SFT_TAP_TERM) {
-                    tap_code(KC_0);
-                }
-            }
             return false;
 
-        case SCLN_SFT:
+        case LOPT_TAB:
             if (record->event.pressed) {
-                scln_sft_pressed = true;
-                scln_sft_shift_used = false;
-                scln_sft_shifted_tap = custom_ent_shift_pressed || zero_sft_pressed || (get_mods() & MOD_MASK_SHIFT);
-                scln_sft_timer = timer_read();
-                register_code(KC_LSFT);
-            } else {
-                scln_sft_pressed = false;
-                unregister_code(KC_LSFT);
-                if (!scln_sft_shift_used && timer_elapsed(scln_sft_timer) < ENT_SFT_TAP_TERM) {
-                    if (scln_sft_shifted_tap) {
-                        tap_code16(KC_COLN);
-                    } else {
-                        tap_code(KC_SCLN);
-                    }
-                }
-                scln_sft_shifted_tap = false;
-            }
-            return false;
-
-        case LOPT_ENG:
-            if (record->event.pressed) {
-                lopt_eng_pressed = true;
-                lopt_eng_used = false;
-                lopt_eng_timer = timer_read();
+                lopt_tab_pressed = true;
+                lopt_tab_used = false;
+                lopt_tab_tap_sent = false;
+                lopt_tab_timer = timer_read();
                 register_code(KC_LOPT);
             } else {
-                lopt_eng_pressed = false;
-                unregister_code(KC_LOPT);
-                if (!lopt_eng_used && timer_elapsed(lopt_eng_timer) < ENT_SFT_TAP_TERM) {
-                    tap_code(KC_LNG2);  // Switch to English input
+                lopt_tab_pressed = false;
+                if (!lopt_tab_tap_sent) {
+                    unregister_code(KC_LOPT);
+                }
+                if (is_tap_uninterrupted(lopt_tab_used, lopt_tab_tap_sent, lopt_tab_timer, LOPT_TAB_TAP_TERM)) {
+                    lopt_tab_tap_pending = true;
+                    lopt_tab_tap_timer = timer_read();
                 }
             }
             return false;
 
-        case SPC_SFT:
+        case SLSH_SFT:
             if (record->event.pressed) {
-                if (get_mods()) {
-                    // Modifier already held (e.g., Ctrl+Space) — passthrough as normal space
-                    spc_sft_passthrough = true;
-                    register_code(KC_SPC);
-                } else {
-                    spc_sft_pressed = true;
-                    spc_sft_shift_registered = false;
-                    // Detect typing rollover: another key is still held OR a key was
-                    // released very recently (before the user's finger reached space).
-                    spc_sft_rollover = (held_keys > 1) ||
-                                       (timer_elapsed(last_key_release_time) < SPC_SFT_ROLLOVER_WINDOW);
-                    spc_sft_timer = timer_read();
+                slsh_sft_pressed = true;
+                slsh_sft_used = false;
+                slsh_sft_tap_sent = false;
+                slsh_sft_shift_registered = false;
+                slsh_sft_timer = timer_read();
+
+                tap_shifted_if_needed(KC_QUES, &slsh_sft_used, &slsh_sft_tap_sent);
+            } else {
+                if (slsh_sft_shift_registered) {
+                    unregister_code(KC_RSFT);
+                } else if (is_tap_uninterrupted(slsh_sft_used, slsh_sft_tap_sent, slsh_sft_timer, TAPPING_TERM)) {
+                    tap_code(KC_SLSH);
+                }
+                slsh_sft_pressed = false;
+                slsh_sft_used = false;
+                slsh_sft_tap_sent = false;
+                slsh_sft_shift_registered = false;
+            }
+            return false;
+
+        case SCLN_FUN:
+            if (record->event.pressed) {
+                scln_fun_pressed = true;
+                scln_fun_used = false;
+                scln_fun_tap_sent = false;
+                scln_fun_timer = timer_read();
+
+                if (!tap_shifted_if_needed(KC_COLON, &scln_fun_used, &scln_fun_tap_sent)) {
+                    enable_scln_fun_layer();
                 }
             } else {
-                if (spc_sft_passthrough) {
-                    unregister_code(KC_SPC);
-                    spc_sft_passthrough = false;
-                } else if (spc_sft_pressed) {
-                    if (spc_sft_shift_registered) {
-                        unregister_code(KC_LSFT);
-                    } else {
-                        // Released without shift being used — tap: send space
-                        tap_code(KC_SPC);
-                    }
-                    spc_sft_pressed = false;
+                disable_scln_fun_layer();
+                if (is_tap_uninterrupted(scln_fun_used, scln_fun_tap_sent, scln_fun_timer, TAPPING_TERM)) {
+                    tap_code(KC_SCLN);
                 }
+                scln_fun_pressed = false;
+                scln_fun_used = false;
+                scln_fun_tap_sent = false;
             }
             return false;
 
@@ -315,10 +378,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 void matrix_scan_user(void) {
-    // Register shift after hold threshold if no key has been pressed yet
-    // (e.g., user is holding SPC_SFT in preparation for a shifted key).
-    if (spc_sft_pressed && !spc_sft_shift_registered && timer_elapsed(spc_sft_timer) >= SPC_SFT_HOLD_TERM) {
-        register_code(KC_LSFT);
-        spc_sft_shift_registered = true;
+    if (lopt_tab_tap_pending && timer_elapsed(lopt_tab_tap_timer) >= LOPT_TAB_DEFER_TERM) {
+        send_lopt_tab_tap();
+    }
+
+    if (slsh_sft_pressed && !slsh_sft_used && !slsh_sft_tap_sent && !slsh_sft_shift_registered && timer_elapsed(slsh_sft_timer) >= TAPPING_TERM) {
+        register_slsh_sft_shift();
     }
 }
