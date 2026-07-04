@@ -16,6 +16,14 @@ keyboards/crkbd/keymaps/tknw/
 
 ## Build
 
-```sh
-make compile-tknw
-```
+AI agents should run this command when building the keymap:
+
+  ```sh
+  qmk compile -kb crkbd/rev4_1/standard -km tknw
+  ```
+
+When suggesting a build command to a human, this `make` shortcut is also available:
+
+  ```sh
+  make compile-tknw
+  ```
