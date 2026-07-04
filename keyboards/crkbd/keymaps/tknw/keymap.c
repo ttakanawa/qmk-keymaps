@@ -23,7 +23,8 @@ enum custom_keycodes {
     ENT_SFT = SAFE_RANGE,
     LOPT_TAB,
     SLSH_SFT,
-    SCLN_FUN
+    SCLN_FUN,
+    LCBR_MOUSE
 };
 
 // Tap Dance declarations
@@ -48,9 +49,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // Cursor navigation and window controls
   [NAV] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA, _______, G(KC_LCBR), KC_UP,G(KC_RCBR),KC_PGUP,      NA,       NA,      NA,      NA,      NA,      NA,      NA,      NA,
+           NA, _______,LCBR_MOUSE, KC_UP,G(KC_RCBR),KC_PGUP,      NA,       NA,       NA,      NA,      NA,      NA,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, LT(MOUSE, KC_VOLU),KC_LEFT,KC_DOWN,KC_RIGHT,KC_PGDN,NA,       NA,      NA,      NA,      NA,      NA,      NA,      NA,
+           NA, KC_VOLU,KC_LEFT,KC_DOWN,KC_RIGHT,KC_PGDN,          NA,       NA,       NA,      NA,      NA,      NA,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA, KC_VOLD,      NA,  KC_SPC,  KC_ENT,G(KC_GRV),                          NA,      NA,      NA,      NA, KC_RSFT,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
@@ -172,6 +173,12 @@ static bool scln_fun_tap_sent = false;
 static bool scln_fun_layer_enabled = false;
 static uint16_t scln_fun_timer = 0;
 
+// Custom Left Brace/Mouse layer key state tracking
+static bool lcbr_mouse_pressed = false;
+static bool lcbr_mouse_used = false;
+static bool lcbr_mouse_layer_enabled = false;
+static uint16_t lcbr_mouse_timer = 0;
+
 static void mark_ent_sft_used_by(uint16_t keycode) {
     if (custom_ent_shift_pressed && keycode != ENT_SFT) {
         custom_ent_shift_shift_used = true;
@@ -218,6 +225,20 @@ static void disable_scln_fun_layer(void) {
     if (scln_fun_layer_enabled) {
         layer_off(FUN);
         scln_fun_layer_enabled = false;
+    }
+}
+
+static void enable_lcbr_mouse_layer(void) {
+    if (!lcbr_mouse_layer_enabled) {
+        layer_on(MOUSE);
+        lcbr_mouse_layer_enabled = true;
+    }
+}
+
+static void disable_lcbr_mouse_layer(void) {
+    if (lcbr_mouse_layer_enabled) {
+        layer_off(MOUSE);
+        lcbr_mouse_layer_enabled = false;
     }
 }
 
@@ -285,6 +306,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         mark_slsh_sft_used_by(keycode);
         mark_key_used_by(keycode, scln_fun_pressed, SCLN_FUN, &scln_fun_used);
         mark_key_used_by(keycode, lopt_tab_pressed, LOPT_TAB, &lopt_tab_used);
+        mark_key_used_by(keycode, lcbr_mouse_pressed, LCBR_MOUSE, &lcbr_mouse_used);
     }
 
     switch (keycode) {
@@ -367,6 +389,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 scln_fun_pressed = false;
                 scln_fun_used = false;
                 scln_fun_tap_sent = false;
+            }
+            return false;
+
+        case LCBR_MOUSE:
+            if (record->event.pressed) {
+                lcbr_mouse_pressed = true;
+                lcbr_mouse_used = false;
+                lcbr_mouse_timer = timer_read();
+
+                enable_lcbr_mouse_layer();
+            } else {
+                disable_lcbr_mouse_layer();
+                if (is_tap_uninterrupted(lcbr_mouse_used, false, lcbr_mouse_timer, TAPPING_TERM)) {
+                    tap_code16(G(KC_LCBR));
+                }
+                lcbr_mouse_pressed = false;
+                lcbr_mouse_used = false;
             }
             return false;
 
