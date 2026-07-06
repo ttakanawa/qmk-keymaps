@@ -38,7 +38,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
       NA, TD(TD_Q_ESC),    KC_W,    KC_E,    KC_R,    KC_T,      NA,         NA,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-           NA,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,      NA,         NA,    KC_H,    KC_J,    KC_K,    KC_L,SCLN_FUN,      NA,
+           NA,    KC_A,    KC_S,    KC_D,    KC_F,LSFT_T(KC_G),  NA,         NA,    KC_H,    KC_J,    KC_K,    KC_L,SCLN_FUN,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA,LSFT_T(KC_Z),KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SLSH_SFT,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
@@ -282,7 +282,7 @@ static void send_lopt_tab_tap(void) {
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     (void)record;
 
-    return keycode != LSFT_T(KC_Z);
+    return keycode != LSFT_T(KC_Z) && keycode != LSFT_T(KC_G);
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
