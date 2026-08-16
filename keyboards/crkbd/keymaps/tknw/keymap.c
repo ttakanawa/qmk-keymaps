@@ -40,9 +40,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
       NA, TD(TD_Q_ESC),    KC_W,    KC_E,    KC_R,    KC_T,  KC_TAB,         NA,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-           NA,    KC_A,    KC_S,    KC_D,    KC_F,LSFT_T(KC_G),KC_LSFT,      NA,    KC_H,    KC_J,    KC_K,    KC_L,SCLN_FUN,      NA,
+           NA,    KC_A,    KC_S,    KC_D,  KC_F,SFT_T(KC_G),KC_LSFT,         NA,    KC_H,    KC_J,    KC_K,    KC_L,SCLN_FUN,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA,LSFT_T(KC_Z),KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SLSH_SFT,      NA,
+           NA, SFT_T(KC_Z),KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SLSH_SFT,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                     LOPT_TAB,LCTL_T(KC_LNG2),KC_LCMD,    ENT_SFT,KC_SPC,TD(TD_NUM_SHENT)
                                       //`--------------------------'  `--------------------------'
@@ -68,7 +68,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA, KC_LPRN, KC_CIRC,      NA,  KC_DLR, KC_RPRN, _______,         NA, KC_BSPC, KC_MINS,  KC_EQL,  KC_GRV, KC_QUOT,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, KC_LSFT, KC_LBRC, KC_RBRC, KC_LCBR, KC_RCBR,                      KC_LBRC, KC_RBRC, _______,_______,RSFT_T(KC_BSLS),NA,
+           NA, KC_LSFT, KC_LBRC, KC_RBRC, KC_LCBR, KC_RCBR,                      KC_LBRC, KC_RBRC, _______,_______,SFT_T(KC_BSLS), NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    _______, _______, _______
                                       //`--------------------------'  `--------------------------'
@@ -317,7 +317,7 @@ static void send_lopt_tab_tap(void) {
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     (void)record;
 
-    return keycode != LSFT_T(KC_Z) && keycode != LSFT_T(KC_G);
+    return keycode != SFT_T(KC_Z) && keycode != SFT_T(KC_G);
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
