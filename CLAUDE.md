@@ -16,7 +16,8 @@ keyboards/crkbd/keymaps/tknw/
 
 ## Build
 
-AI agents should run this command when building the keymap:
+Unit tests are not required and do not need to be implemented. To verify changes,
+AI agents only need to confirm that the following command succeeds:
 
   ```sh
   qmk compile -kb crkbd/rev4_1/standard -km tknw
