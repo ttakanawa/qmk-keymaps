@@ -31,8 +31,7 @@ enum custom_keycodes {
 
 // Tap Dance declarations
 enum {
-    TD_Q_ESC,
-    TD_NUM_SHENT
+    TD_Q_ESC
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -44,7 +43,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA, SFT_T(KC_Z),KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SLSH_SFT,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                    LOPT_TAB,LCTL_T(KC_LNG2),KC_LCMD,    ENT_SFT,KC_SPC,TD(TD_NUM_SHENT)
+                                    LOPT_TAB,LCTL_T(KC_LNG2),KC_LCMD,    ENT_SFT,KC_SPC,LT(NUM, KC_LNG1)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -133,32 +132,8 @@ void q_reset(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void num_each_tap(tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-        layer_on(NUM);
-    } else {
-        layer_off(NUM);
-    }
-}
-
-void num_finished(tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1 && !state->pressed) {
-        layer_off(NUM);
-        tap_code(KC_LNG1);
-    } else if (state->count >= 2) {
-        register_code(KC_LSFT);
-        tap_code(KC_ENT);
-        unregister_code(KC_LSFT);
-    }
-}
-
-void num_reset(tap_dance_state_t *state, void *user_data) {
-    layer_off(NUM);
-}
-
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset),
-    [TD_NUM_SHENT] = ACTION_TAP_DANCE_FN_ADVANCED(num_each_tap, num_finished, num_reset)
+    [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset)
 };
 
 // Custom Enter/Shift key state tracking
