@@ -7,7 +7,6 @@
 // LOPT_TAB tap time threshold (ms)
 #define LOPT_TAB_TAP_TERM 400
 #define LOPT_TAB_DEFER_TERM 10
-#define ENT_SFT_TAP_TERM 400
 
 // Layers
 enum layers {
@@ -21,9 +20,7 @@ enum layers {
 
 // Custom keycodes
 enum custom_keycodes {
-    ENT_SFT = SAFE_RANGE,
-    LOPT_TAB,
-    SLSH_SFT,
+    LOPT_TAB = SAFE_RANGE,
     SCLN_FUN,
     LCBR_MISC,
     VOLU_MOUSE
@@ -43,7 +40,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA, SFT_T(KC_Z),KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SFT_T(KC_SLSH),NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                    LOPT_TAB,LCTL_T(KC_LNG2),KC_LCMD,    ENT_SFT,KC_SPC,LT(NUM, KC_LNG1)
+                                    LOPT_TAB,LCTL_T(KC_LNG2),KC_LCMD,SFT_T(KC_ENT),KC_SPC,LT(NUM, KC_LNG1)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -136,11 +133,6 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset)
 };
 
-// Custom Enter/Shift key state tracking
-static bool custom_ent_shift_pressed = false;
-static bool custom_ent_shift_shift_used = false;
-static uint16_t custom_ent_shift_timer = 0;
-
 // Custom LOPT/Tab key state tracking
 static bool lopt_tab_pressed = false;              // Is LOPT_TAB currently held?
 static bool lopt_tab_used = false;                 // Was LOPT used while LOPT_TAB held?
@@ -148,13 +140,6 @@ static uint16_t lopt_tab_timer = 0;                // Timer to track hold durati
 static bool lopt_tab_tap_pending = false;
 static bool lopt_tab_tap_sent = false;
 static uint16_t lopt_tab_tap_timer = 0;
-
-// Custom Slash/Shift key state tracking
-static bool slsh_sft_pressed = false;
-static bool slsh_sft_used = false;
-static bool slsh_sft_tap_sent = false;
-static bool slsh_sft_shift_registered = false;
-static uint16_t slsh_sft_timer = 0;
 
 // Custom Semicolon/Function layer key state tracking
 static bool scln_fun_pressed = false;
@@ -175,38 +160,9 @@ static bool volu_mouse_used = false;
 static bool volu_mouse_layer_enabled = false;
 static uint16_t volu_mouse_timer = 0;
 
-static void mark_ent_sft_used_by(uint16_t keycode) {
-    if (custom_ent_shift_pressed && keycode != ENT_SFT) {
-        custom_ent_shift_shift_used = true;
-    }
-}
-
 static void mark_key_used_by(uint16_t keycode, bool pressed, uint16_t self_keycode, bool *used) {
     if (pressed && keycode != self_keycode && !IS_MODIFIER_KEYCODE(keycode)) {
         *used = true;
-    }
-}
-
-static void register_slsh_sft_shift(void) {
-    if (!slsh_sft_shift_registered) {
-        register_code(KC_RSFT);
-        slsh_sft_shift_registered = true;
-    }
-}
-
-static void mark_slsh_sft_used_by(uint16_t keycode) {
-    if (!slsh_sft_pressed || keycode == SLSH_SFT) {
-        return;
-    }
-
-    slsh_sft_used = true;
-    if (keycode == ENT_SFT) {
-        if (slsh_sft_shift_registered) {
-            unregister_code(KC_RSFT);
-            slsh_sft_shift_registered = false;
-        }
-    } else if (!slsh_sft_tap_sent && !IS_MODIFIER_KEYCODE(keycode)) {
-        register_slsh_sft_shift();
     }
 }
 
@@ -269,16 +225,13 @@ static bool is_tap_uninterrupted(bool used, bool tap_sent, uint16_t timer, uint1
 }
 
 static bool tap_shifted_if_needed(uint16_t keycode, bool *used, bool *tap_sent) {
-    if (!(custom_ent_shift_pressed || (get_mods() & MOD_MASK_SHIFT))) {
+    if (!(get_mods() & MOD_MASK_SHIFT)) {
         return false;
     }
 
     tap_code16(keycode);
     *used = true;
     *tap_sent = true;
-    if (custom_ent_shift_pressed) {
-        custom_ent_shift_shift_used = true;
-    }
     return true;
 }
 
@@ -312,8 +265,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     if (record->event.pressed) {
-        mark_ent_sft_used_by(keycode);
-        mark_slsh_sft_used_by(keycode);
         mark_key_used_by(keycode, scln_fun_pressed, SCLN_FUN, &scln_fun_used);
         mark_key_used_by(keycode, lopt_tab_pressed, LOPT_TAB, &lopt_tab_used);
         mark_key_used_by(keycode, lcbr_misc_pressed, LCBR_MISC, &lcbr_misc_used);
@@ -321,26 +272,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     switch (keycode) {
-        case ENT_SFT:
-            if (record->event.pressed) {
-                bool slsh_sft_chord = slsh_sft_pressed && !slsh_sft_tap_sent;
-
-                custom_ent_shift_pressed = true;
-                custom_ent_shift_shift_used = slsh_sft_chord;
-                custom_ent_shift_timer = timer_read();
-                register_code(KC_RSFT);
-                if (slsh_sft_chord) {
-                    tap_code(KC_ENT);
-                }
-            } else {
-                custom_ent_shift_pressed = false;
-                unregister_code(KC_RSFT);
-                if (!custom_ent_shift_shift_used && timer_elapsed(custom_ent_shift_timer) < ENT_SFT_TAP_TERM) {
-                    tap_code(KC_ENT);
-                }
-            }
-            return false;
-
         case LOPT_TAB:
             if (record->event.pressed) {
                 lopt_tab_pressed = true;
@@ -357,28 +288,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     lopt_tab_tap_pending = true;
                     lopt_tab_tap_timer = timer_read();
                 }
-            }
-            return false;
-
-        case SLSH_SFT:
-            if (record->event.pressed) {
-                slsh_sft_pressed = true;
-                slsh_sft_used = false;
-                slsh_sft_tap_sent = false;
-                slsh_sft_shift_registered = false;
-                slsh_sft_timer = timer_read();
-
-                tap_shifted_if_needed(KC_QUES, &slsh_sft_used, &slsh_sft_tap_sent);
-            } else {
-                if (slsh_sft_shift_registered) {
-                    unregister_code(KC_RSFT);
-                } else if (is_tap_uninterrupted(slsh_sft_used, slsh_sft_tap_sent, slsh_sft_timer, TAPPING_TERM)) {
-                    tap_code(KC_SLSH);
-                }
-                slsh_sft_pressed = false;
-                slsh_sft_used = false;
-                slsh_sft_tap_sent = false;
-                slsh_sft_shift_registered = false;
             }
             return false;
 
@@ -447,9 +356,5 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 void matrix_scan_user(void) {
     if (lopt_tab_tap_pending && timer_elapsed(lopt_tab_tap_timer) >= LOPT_TAB_DEFER_TERM) {
         send_lopt_tab_tap();
-    }
-
-    if (slsh_sft_pressed && !slsh_sft_used && !slsh_sft_tap_sent && !slsh_sft_shift_registered && timer_elapsed(slsh_sft_timer) >= TAPPING_TERM) {
-        register_slsh_sft_shift();
     }
 }
