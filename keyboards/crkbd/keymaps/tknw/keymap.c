@@ -127,7 +127,6 @@ tap_dance_action_t tap_dance_actions[] = {
 };
 
 // Custom Left Brace/Miscellaneous layer key state tracking
-static bool lcbr_misc_pressed = false;
 static bool lcbr_misc_used = false;
 static uint16_t lcbr_misc_timer = 0;
 
@@ -149,26 +148,23 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (keycode != LCBR_MISC) {
-        if (record->event.pressed && lcbr_misc_pressed && !IS_MODIFIER_KEYCODE(keycode)) {
-            lcbr_misc_used = true;
+    if (keycode == LCBR_MISC) {
+        if (record->event.pressed) {
+            lcbr_misc_used = false;
+            lcbr_misc_timer = timer_read();
+            layer_on(MISC);
+        } else {
+            layer_off(MISC);
+            if (!lcbr_misc_used && timer_elapsed(lcbr_misc_timer) < TAPPING_TERM) {
+                tap_code16(G(KC_LCBR));
+            }
         }
-        return true;
+        return false;
     }
 
-    if (record->event.pressed) {
-        lcbr_misc_pressed = true;
-        lcbr_misc_used = false;
-        lcbr_misc_timer = timer_read();
-        layer_on(MISC);
-    } else {
-        layer_off(MISC);
-        if (!lcbr_misc_used && timer_elapsed(lcbr_misc_timer) < TAPPING_TERM) {
-            tap_code16(G(KC_LCBR));
-        }
-        lcbr_misc_pressed = false;
-        lcbr_misc_used = false;
+    if (record->event.pressed && IS_LAYER_ON(MISC) && !IS_MODIFIER_KEYCODE(keycode)) {
+        lcbr_misc_used = true;
     }
 
-    return false;
+    return true;
 }
