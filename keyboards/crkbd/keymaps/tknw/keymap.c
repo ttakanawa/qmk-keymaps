@@ -21,7 +21,6 @@ enum layers {
 // Custom keycodes
 enum custom_keycodes {
     LOPT_TAB = SAFE_RANGE,
-    SCLN_FUN,
     LCBR_MISC
 };
 
@@ -35,7 +34,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
       NA, TD(TD_Q_ESC),    KC_W,    KC_E,    KC_R,    KC_T,  KC_TAB,         NA,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-           NA,    KC_A,    KC_S,    KC_D,  KC_F,SFT_T(KC_G),KC_LSFT,         NA,    KC_H,    KC_J,    KC_K,    KC_L,SCLN_FUN,      NA,
+           NA,    KC_A,    KC_S,    KC_D,  KC_F,SFT_T(KC_G),KC_LSFT,         NA,    KC_H,    KC_J,    KC_K,   KC_L,LT(FUN,KC_SCLN),NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA, SFT_T(KC_Z),KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SFT_T(KC_SLSH),NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
@@ -140,13 +139,6 @@ static bool lopt_tab_tap_pending = false;
 static bool lopt_tab_tap_sent = false;
 static uint16_t lopt_tab_tap_timer = 0;
 
-// Custom Semicolon/Function layer key state tracking
-static bool scln_fun_pressed = false;
-static bool scln_fun_used = false;
-static bool scln_fun_tap_sent = false;
-static bool scln_fun_layer_enabled = false;
-static uint16_t scln_fun_timer = 0;
-
 // Custom Left Brace/Miscellaneous layer key state tracking
 static bool lcbr_misc_pressed = false;
 static bool lcbr_misc_used = false;
@@ -156,20 +148,6 @@ static uint16_t lcbr_misc_timer = 0;
 static void mark_key_used_by(uint16_t keycode, bool pressed, uint16_t self_keycode, bool *used) {
     if (pressed && keycode != self_keycode && !IS_MODIFIER_KEYCODE(keycode)) {
         *used = true;
-    }
-}
-
-static void enable_scln_fun_layer(void) {
-    if (!scln_fun_layer_enabled) {
-        layer_on(FUN);
-        scln_fun_layer_enabled = true;
-    }
-}
-
-static void disable_scln_fun_layer(void) {
-    if (scln_fun_layer_enabled) {
-        layer_off(FUN);
-        scln_fun_layer_enabled = false;
     }
 }
 
@@ -203,17 +181,6 @@ static bool is_tap_uninterrupted(bool used, bool tap_sent, uint16_t timer, uint1
     return !used && !tap_sent && timer_elapsed(timer) < term;
 }
 
-static bool tap_shifted_if_needed(uint16_t keycode, bool *used, bool *tap_sent) {
-    if (!(get_mods() & MOD_MASK_SHIFT)) {
-        return false;
-    }
-
-    tap_code16(keycode);
-    *used = true;
-    *tap_sent = true;
-    return true;
-}
-
 static void send_lopt_tab_tap(void) {
     tap_code(KC_TAB);
     lopt_tab_tap_pending = false;
@@ -244,7 +211,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     if (record->event.pressed) {
-        mark_key_used_by(keycode, scln_fun_pressed, SCLN_FUN, &scln_fun_used);
         mark_key_used_by(keycode, lopt_tab_pressed, LOPT_TAB, &lopt_tab_used);
         mark_key_used_by(keycode, lcbr_misc_pressed, LCBR_MISC, &lcbr_misc_used);
     }
@@ -266,27 +232,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     lopt_tab_tap_pending = true;
                     lopt_tab_tap_timer = timer_read();
                 }
-            }
-            return false;
-
-        case SCLN_FUN:
-            if (record->event.pressed) {
-                scln_fun_pressed = true;
-                scln_fun_used = false;
-                scln_fun_tap_sent = false;
-                scln_fun_timer = timer_read();
-
-                if (!tap_shifted_if_needed(KC_COLON, &scln_fun_used, &scln_fun_tap_sent)) {
-                    enable_scln_fun_layer();
-                }
-            } else {
-                disable_scln_fun_layer();
-                if (is_tap_uninterrupted(scln_fun_used, scln_fun_tap_sent, scln_fun_timer, TAPPING_TERM)) {
-                    tap_code(KC_SCLN);
-                }
-                scln_fun_pressed = false;
-                scln_fun_used = false;
-                scln_fun_tap_sent = false;
             }
             return false;
 
