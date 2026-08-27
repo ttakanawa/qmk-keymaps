@@ -4,10 +4,6 @@
 // Define NA for unused keys
 #define NA XXXXXXX
 
-// LOPT_TAB tap time threshold (ms)
-#define LOPT_TAB_TAP_TERM 400
-#define LOPT_TAB_DEFER_TERM 10
-
 // Layers
 enum layers {
     BASE,
@@ -20,8 +16,7 @@ enum layers {
 
 // Custom keycodes
 enum custom_keycodes {
-    LOPT_TAB = SAFE_RANGE,
-    LCBR_MISC
+    LCBR_MISC = SAFE_RANGE
 };
 
 // Tap Dance declarations
@@ -38,7 +33,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA, SFT_T(KC_Z),KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SFT_T(KC_SLSH),NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                    LOPT_TAB,LCTL_T(KC_LNG2),KC_LCMD,SFT_T(KC_ENT),KC_SPC,LT(NUM, KC_LNG1)
+                               OPT_T(KC_TAB),LCTL_T(KC_LNG2),KC_LCMD,SFT_T(KC_ENT),KC_SPC,LT(NUM, KC_LNG1)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -131,14 +126,6 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset)
 };
 
-// Custom LOPT/Tab key state tracking
-static bool lopt_tab_pressed = false;              // Is LOPT_TAB currently held?
-static bool lopt_tab_used = false;                 // Was LOPT used while LOPT_TAB held?
-static uint16_t lopt_tab_timer = 0;                // Timer to track hold duration
-static bool lopt_tab_tap_pending = false;
-static bool lopt_tab_tap_sent = false;
-static uint16_t lopt_tab_tap_timer = 0;
-
 // Custom Left Brace/Miscellaneous layer key state tracking
 static bool lcbr_misc_pressed = false;
 static bool lcbr_misc_used = false;
@@ -165,27 +152,8 @@ static void disable_lcbr_misc_layer(void) {
     }
 }
 
-static bool is_modifier_release_key(uint16_t keycode, keyrecord_t *record) {
-    if (record->event.pressed) {
-        return false;
-    }
-
-    if (IS_MODIFIER_KEYCODE(keycode)) {
-        return true;
-    }
-
-    return IS_QK_MOD_TAP(keycode) && record->tap.count == 0;
-}
-
 static bool is_tap_uninterrupted(bool used, bool tap_sent, uint16_t timer, uint16_t term) {
     return !used && !tap_sent && timer_elapsed(timer) < term;
-}
-
-static void send_lopt_tab_tap(void) {
-    tap_code(KC_TAB);
-    lopt_tab_tap_pending = false;
-    lopt_tab_tap_sent = true;
-    lopt_tab_used = true;
 }
 
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
@@ -206,46 +174,11 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (lopt_tab_pressed && !lopt_tab_used && !lopt_tab_tap_sent && is_modifier_release_key(keycode, record) &&
-        timer_elapsed(lopt_tab_timer) < LOPT_TAB_TAP_TERM) {
-        unregister_code(KC_LOPT);
-        send_lopt_tab_tap();
-    }
-
-    if (lopt_tab_tap_pending) {
-        if (is_modifier_release_key(keycode, record)) {
-            // Send Tab before modifier release is processed, preserving modifier+Tab.
-            send_lopt_tab_tap();
-        } else if (record->event.pressed && !IS_MODIFIER_KEYCODE(keycode)) {
-            send_lopt_tab_tap();
-        }
-    }
-
     if (record->event.pressed) {
-        mark_key_used_by(keycode, lopt_tab_pressed, LOPT_TAB, &lopt_tab_used);
         mark_key_used_by(keycode, lcbr_misc_pressed, LCBR_MISC, &lcbr_misc_used);
     }
 
     switch (keycode) {
-        case LOPT_TAB:
-            if (record->event.pressed) {
-                lopt_tab_pressed = true;
-                lopt_tab_used = false;
-                lopt_tab_tap_sent = false;
-                lopt_tab_timer = timer_read();
-                register_code(KC_LOPT);
-            } else {
-                lopt_tab_pressed = false;
-                if (!lopt_tab_tap_sent) {
-                    unregister_code(KC_LOPT);
-                }
-                if (is_tap_uninterrupted(lopt_tab_used, lopt_tab_tap_sent, lopt_tab_timer, LOPT_TAB_TAP_TERM)) {
-                    lopt_tab_tap_pending = true;
-                    lopt_tab_tap_timer = timer_read();
-                }
-            }
-            return false;
-
         case LCBR_MISC:
             if (record->event.pressed) {
                 lcbr_misc_pressed = true;
@@ -268,10 +201,4 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     return true;  // Continue normal processing for other keys
-}
-
-void matrix_scan_user(void) {
-    if (lopt_tab_tap_pending && timer_elapsed(lopt_tab_tap_timer) >= LOPT_TAB_DEFER_TERM) {
-        send_lopt_tab_tap();
-    }
 }
