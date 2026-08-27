@@ -129,32 +129,7 @@ tap_dance_action_t tap_dance_actions[] = {
 // Custom Left Brace/Miscellaneous layer key state tracking
 static bool lcbr_misc_pressed = false;
 static bool lcbr_misc_used = false;
-static bool lcbr_misc_layer_enabled = false;
 static uint16_t lcbr_misc_timer = 0;
-
-static void mark_key_used_by(uint16_t keycode, bool pressed, uint16_t self_keycode, bool *used) {
-    if (pressed && keycode != self_keycode && !IS_MODIFIER_KEYCODE(keycode)) {
-        *used = true;
-    }
-}
-
-static void enable_lcbr_misc_layer(void) {
-    if (!lcbr_misc_layer_enabled) {
-        layer_on(MISC);
-        lcbr_misc_layer_enabled = true;
-    }
-}
-
-static void disable_lcbr_misc_layer(void) {
-    if (lcbr_misc_layer_enabled) {
-        layer_off(MISC);
-        lcbr_misc_layer_enabled = false;
-    }
-}
-
-static bool is_tap_uninterrupted(bool used, bool tap_sent, uint16_t timer, uint16_t term) {
-    return !used && !tap_sent && timer_elapsed(timer) < term;
-}
 
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     (void)record;
@@ -174,31 +149,26 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (keycode != LCBR_MISC) {
+        if (record->event.pressed && lcbr_misc_pressed && !IS_MODIFIER_KEYCODE(keycode)) {
+            lcbr_misc_used = true;
+        }
+        return true;
+    }
+
     if (record->event.pressed) {
-        mark_key_used_by(keycode, lcbr_misc_pressed, LCBR_MISC, &lcbr_misc_used);
+        lcbr_misc_pressed = true;
+        lcbr_misc_used = false;
+        lcbr_misc_timer = timer_read();
+        layer_on(MISC);
+    } else {
+        layer_off(MISC);
+        if (!lcbr_misc_used && timer_elapsed(lcbr_misc_timer) < TAPPING_TERM) {
+            tap_code16(G(KC_LCBR));
+        }
+        lcbr_misc_pressed = false;
+        lcbr_misc_used = false;
     }
 
-    switch (keycode) {
-        case LCBR_MISC:
-            if (record->event.pressed) {
-                lcbr_misc_pressed = true;
-                lcbr_misc_used = false;
-                lcbr_misc_timer = timer_read();
-
-                enable_lcbr_misc_layer();
-            } else {
-                disable_lcbr_misc_layer();
-                if (is_tap_uninterrupted(lcbr_misc_used, false, lcbr_misc_timer, TAPPING_TERM)) {
-                    tap_code16(G(KC_LCBR));
-                }
-                lcbr_misc_pressed = false;
-                lcbr_misc_used = false;
-            }
-            return false;
-
-        default:
-            break;
-    }
-
-    return true;  // Continue normal processing for other keys
+    return false;
 }
