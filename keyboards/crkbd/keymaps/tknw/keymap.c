@@ -188,6 +188,17 @@ static void send_lopt_tab_tap(void) {
     lopt_tab_used = true;
 }
 
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
+    (void)record;
+
+    switch (keycode) {
+        case SFT_T(KC_SLSH):
+            return 200;
+        default:
+            return TAPPING_TERM;
+    }
+}
+
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     (void)record;
 
