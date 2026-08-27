@@ -22,8 +22,7 @@ enum layers {
 enum custom_keycodes {
     LOPT_TAB = SAFE_RANGE,
     SCLN_FUN,
-    LCBR_MISC,
-    VOLU_MOUSE
+    LCBR_MISC
 };
 
 // Tap Dance declarations
@@ -49,7 +48,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
            NA, _______, LCBR_MISC, KC_UP,G(KC_RCBR),KC_PGUP,_______,         NA,      NA,      NA,      NA,      NA,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA,VOLU_MOUSE,KC_LEFT,KC_DOWN,KC_RIGHT,  KC_PGDN,_______,         NA,      NA,      NA,      NA,      NA,      NA,      NA,
+     NA,LT(MOUSE, KC_VOLU),KC_LEFT,KC_DOWN,KC_RIGHT,KC_PGDN,_______,         NA,      NA,      NA,      NA,      NA,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA, KC_VOLD,      NA,  KC_SPC,  KC_ENT,G(KC_GRV),                          NA,      NA,      NA,      NA, KC_RSFT,      NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
@@ -154,12 +153,6 @@ static bool lcbr_misc_used = false;
 static bool lcbr_misc_layer_enabled = false;
 static uint16_t lcbr_misc_timer = 0;
 
-// Custom Volume Up/Mouse layer key state tracking
-static bool volu_mouse_pressed = false;
-static bool volu_mouse_used = false;
-static bool volu_mouse_layer_enabled = false;
-static uint16_t volu_mouse_timer = 0;
-
 static void mark_key_used_by(uint16_t keycode, bool pressed, uint16_t self_keycode, bool *used) {
     if (pressed && keycode != self_keycode && !IS_MODIFIER_KEYCODE(keycode)) {
         *used = true;
@@ -191,20 +184,6 @@ static void disable_lcbr_misc_layer(void) {
     if (lcbr_misc_layer_enabled) {
         layer_off(MISC);
         lcbr_misc_layer_enabled = false;
-    }
-}
-
-static void enable_volu_mouse_layer(void) {
-    if (!volu_mouse_layer_enabled) {
-        layer_on(MOUSE);
-        volu_mouse_layer_enabled = true;
-    }
-}
-
-static void disable_volu_mouse_layer(void) {
-    if (volu_mouse_layer_enabled) {
-        layer_off(MOUSE);
-        volu_mouse_layer_enabled = false;
     }
 }
 
@@ -268,7 +247,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         mark_key_used_by(keycode, scln_fun_pressed, SCLN_FUN, &scln_fun_used);
         mark_key_used_by(keycode, lopt_tab_pressed, LOPT_TAB, &lopt_tab_used);
         mark_key_used_by(keycode, lcbr_misc_pressed, LCBR_MISC, &lcbr_misc_used);
-        mark_key_used_by(keycode, volu_mouse_pressed, VOLU_MOUSE, &volu_mouse_used);
     }
 
     switch (keycode) {
@@ -326,23 +304,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 }
                 lcbr_misc_pressed = false;
                 lcbr_misc_used = false;
-            }
-            return false;
-
-        case VOLU_MOUSE:
-            if (record->event.pressed) {
-                volu_mouse_pressed = true;
-                volu_mouse_used = false;
-                volu_mouse_timer = timer_read();
-
-                enable_volu_mouse_layer();
-            } else {
-                disable_volu_mouse_layer();
-                if (is_tap_uninterrupted(volu_mouse_used, false, volu_mouse_timer, TAPPING_TERM)) {
-                    tap_code(KC_VOLU);
-                }
-                volu_mouse_pressed = false;
-                volu_mouse_used = false;
             }
             return false;
 
