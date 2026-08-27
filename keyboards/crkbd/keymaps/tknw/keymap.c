@@ -20,13 +20,13 @@ enum custom_keycodes {
 
 // Tap Dance declarations
 enum {
-    TD_Q_ESC
+    Q_NAV_ESC
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [BASE] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-      NA, TD(TD_Q_ESC),    KC_W,    KC_E,    KC_R,    KC_T,  KC_TAB,         NA,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
+      NA, TD(Q_NAV_ESC),   KC_W,    KC_E,    KC_R,    KC_T,  KC_TAB,         NA,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
            NA,    KC_A,    KC_S,    KC_D,  KC_F,SFT_T(KC_G),KC_LSFT,         NA,    KC_H,    KC_J,    KC_K,   KC_L,LT(FUN,KC_SCLN),NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
@@ -103,7 +103,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 // Tap Dance definitions
-void q_finished(tap_dance_state_t *state, void *user_data) {
+static void q_nav_finished(tap_dance_state_t *state, void *user_data) {
+    (void)user_data;
+
     if (state->count == 1) {
         if (state->pressed) {
             layer_on(NAV);  // Hold: enable NAV
@@ -115,14 +117,16 @@ void q_finished(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void q_reset(tap_dance_state_t *state, void *user_data) {
+static void q_nav_reset(tap_dance_state_t *state, void *user_data) {
+    (void)user_data;
+
     if (state->count == 1) {
         layer_off(NAV);  // Release: disable NAV
     }
 }
 
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_Q_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_finished, q_reset)
+    [Q_NAV_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_nav_finished, q_nav_reset)
 };
 
 // Custom Left Brace/Miscellaneous layer key state tracking
