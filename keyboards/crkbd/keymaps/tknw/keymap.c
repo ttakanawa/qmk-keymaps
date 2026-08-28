@@ -13,17 +13,20 @@ enum layers {
     MISC
 };
 
-#define Q_NAV LT(NAV, KC_Q)
-
 // Custom keycodes
 enum custom_keycodes {
     LCBR_MISC = SAFE_RANGE
 };
 
+// Tap Dance declarations
+enum {
+    Q_NAV_ESC
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [BASE] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-      NA,        Q_NAV,    KC_W,    KC_E,    KC_R,    KC_T,  KC_TAB,         NA,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
+      NA, TD(Q_NAV_ESC),   KC_W,    KC_E,    KC_R,    KC_T,  KC_TAB,         NA,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
            NA,    KC_A,    KC_S,    KC_D,  KC_F,SFT_T(KC_G),KC_LSFT,         NA,    KC_H,    KC_J,    KC_K,   KC_L,LT(FUN,KC_SCLN),NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
@@ -99,25 +102,36 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   )
 };
 
-// Q/NAV/Escape state tracking
-static bool q_tap_pending = false;
-static uint16_t q_tap_timer = 0;
-static uint16_t q_tap_term = 0;
+// Tap Dance definitions
+static void q_nav_finished(tap_dance_state_t *state, void *user_data) {
+    (void)user_data;
+
+    if (state->count == 1) {
+        if (state->pressed) {
+            layer_on(NAV);  // Hold: enable NAV
+        } else {
+            tap_code(KC_Q);  // Single tap: Q
+        }
+    } else if (state->count >= 2) {
+        tap_code(KC_ESC);  // Double tap: ESC
+    }
+}
+
+static void q_nav_reset(tap_dance_state_t *state, void *user_data) {
+    (void)user_data;
+
+    if (state->count == 1) {
+        layer_off(NAV);  // Release: disable NAV
+    }
+}
+
+tap_dance_action_t tap_dance_actions[] = {
+    [Q_NAV_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_nav_finished, q_nav_reset)
+};
 
 // Custom Left Brace/Miscellaneous layer key state tracking
 static bool lcbr_misc_used = false;
 static uint16_t lcbr_misc_timer = 0;
-
-static void send_q_tap(void) {
-    tap_code(KC_Q);
-    q_tap_pending = false;
-}
-
-static void start_q_tap(keyrecord_t *record) {
-    q_tap_pending = true;
-    q_tap_timer = record->event.time;
-    q_tap_term = GET_QUICK_TAP_TERM(Q_NAV, record);
-}
 
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     (void)record;
@@ -133,38 +147,10 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     (void)record;
 
-    return keycode != Q_NAV && keycode != SFT_T(KC_Z) && keycode != SFT_T(KC_G);
-}
-
-bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
-    (void)record;
-
-    return keycode == Q_NAV;
+    return keycode != SFT_T(KC_Z) && keycode != SFT_T(KC_G);
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (q_tap_pending && keycode != Q_NAV) {
-        send_q_tap();
-    }
-
-    if (keycode == Q_NAV && record->tap.count > 0) {
-        if (record->event.pressed) {
-            if (record->tap.count == 1 && q_tap_pending) {
-                send_q_tap();
-            }
-
-            if (q_tap_pending) {
-                q_tap_pending = false;
-                tap_code(KC_ESC);
-            } else {
-                start_q_tap(record);
-            }
-        } else if (q_tap_pending) {
-            q_tap_timer = record->event.time;
-        }
-        return false;
-    }
-
     if (keycode == LCBR_MISC) {
         if (record->event.pressed) {
             lcbr_misc_used = false;
@@ -184,10 +170,4 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     return true;
-}
-
-void matrix_scan_user(void) {
-    if (q_tap_pending && timer_elapsed(q_tap_timer) >= q_tap_term) {
-        send_q_tap();
-    }
 }
