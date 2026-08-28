@@ -12,9 +12,6 @@
 // get_hold_on_other_key_press() opts out.
 #define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
 
-// Distinguish nested holds from rolling taps for selected tap-hold keys.
-#define PERMISSIVE_HOLD_PER_KEY
-
 // Allow get_tapping_term() to override the tapping term for specific keys.
 #define TAPPING_TERM_PER_KEY
 
