@@ -15,6 +15,9 @@
 // Allow get_tapping_term() to override the tapping term for specific keys.
 #define TAPPING_TERM_PER_KEY
 
+// Decide same-hand tap-hold chords when the next key is pressed.
+#define CHORDAL_HOLD
+
 // RGB Matrix - disabled on startup
 #define RGB_MATRIX_DEFAULT_ON false
 // Default effect (solid color only)

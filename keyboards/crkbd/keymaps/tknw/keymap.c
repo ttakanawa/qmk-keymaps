@@ -137,6 +137,10 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     (void)record;
 
     switch (keycode) {
+        case SFT_T(KC_ENT):
+        case LT(MOUSE, KC_VOLU):
+            return 400;
+        case TD(Q_NAV_ESC):
         case SFT_T(KC_SLSH):
             return 200;
         default:
@@ -147,7 +151,18 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     (void)record;
 
-    return keycode != SFT_T(KC_Z) && keycode != SFT_T(KC_G);
+    return keycode != SFT_T(KC_Z);
+}
+
+bool get_chordal_hold(uint16_t tap_hold_keycode, keyrecord_t *tap_hold_record,
+                      uint16_t other_keycode, keyrecord_t *other_record) {
+    (void)other_keycode;
+
+    if (tap_hold_keycode == SFT_T(KC_Z)) {
+        return get_chordal_hold_default(tap_hold_record, other_record);
+    }
+
+    return true;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
