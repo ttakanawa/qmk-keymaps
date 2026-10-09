@@ -3,6 +3,10 @@
 // Define NA for unused keys
 #define NA XXXXXXX
 
+// Native Mod-Tap owns event ordering. Right Shift is independent of the
+// left Shift holds on the other Mod-Tap keys.
+#define SPC_SFT RSFT_T(KC_SPC)
+
 // Layers
 enum layers {
     BASE,
@@ -32,7 +36,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
            NA, KC_Z,KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SFT_T(KC_SLSH),NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                               OPT_T(KC_TAB),LCTL_T(KC_LNG2),KC_LCMD,SFT_T(KC_ENT),KC_SPC,LT(NUM, KC_LNG1)
+                               OPT_T(KC_TAB),LCTL_T(KC_LNG2),KC_LCMD,SFT_T(KC_ENT),SPC_SFT,LT(NUM, KC_LNG1)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -137,6 +141,8 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     (void)record;
 
     switch (keycode) {
+        case SPC_SFT:
+            return 200;
         case LT(MOUSE, KC_VOLU):
             return 400;
         case TD(Q_NAV_ESC):
@@ -144,6 +150,39 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         default:
             return TAPPING_TERM;
     }
+}
+
+uint16_t get_quick_tap_term(uint16_t keycode, keyrecord_t *record) {
+    (void)record;
+
+    return keycode == SPC_SFT ? 0 : QUICK_TAP_TERM;
+}
+
+bool is_flow_tap_key(uint16_t keycode) {
+    if (get_mods() & MOD_MASK_CAG) {
+        return false;
+    }
+
+    keycode = get_tap_keycode(keycode);
+    if (IS_QK_MODS(keycode)) {
+        keycode = QK_MODS_GET_BASIC_KEYCODE(keycode);
+    }
+
+    // Printable letters, digits and punctuation share the same typing rule.
+    return (keycode >= KC_A && keycode <= KC_0) ||
+           (keycode >= KC_SPC && keycode <= KC_SLSH) || keycode == KC_NUBS;
+}
+
+uint16_t get_flow_tap_term(uint16_t keycode, keyrecord_t *record, uint16_t prev_keycode) {
+    (void)record;
+
+    // Only Space/Shift uses typing flow. A preceding Space tap bypasses
+    // Flow Tap so the next press can immediately become Shift on a chord.
+    if (keycode == SPC_SFT && get_tap_keycode(prev_keycode) != KC_SPC &&
+        is_flow_tap_key(prev_keycode)) {
+        return FLOW_TAP_TERM;
+    }
+    return 0;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {

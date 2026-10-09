@@ -14,6 +14,12 @@
 // Allow get_tapping_term() to override the tapping term for specific keys.
 #define TAPPING_TERM_PER_KEY
 
+// Keep Space during typing; get_flow_tap_term() limits this to Space/Shift.
+#define FLOW_TAP_TERM 100
+
+// Allow Space tap-then-hold to select Shift instead of repeating Space.
+#define QUICK_TAP_TERM_PER_KEY
+
 // RGB Matrix - disabled on startup
 #define RGB_MATRIX_DEFAULT_ON false
 // Default effect (solid color only)
