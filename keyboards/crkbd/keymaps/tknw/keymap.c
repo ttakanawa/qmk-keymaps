@@ -8,24 +8,13 @@
 #define SPC_SFT RSFT_T(KC_SPC)
 
 // Layers
-enum layers {
-    BASE,
-    NAV,
-    NUM,
-    FUN,
-    MOUSE,
-    MISC
-};
+enum layers { BASE, NAV, NUM, FUN, MOUSE, MISC };
 
 // Custom keycodes
-enum custom_keycodes {
-    LCBR_MISC = SAFE_RANGE
-};
+enum custom_keycodes { LCBR_MISC = SAFE_RANGE };
 
 // Tap Dance declarations
-enum {
-    Q_NAV_ESC
-};
+enum { Q_NAV_ESC };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [BASE] = LAYOUT_split_3x6_3_ex2(
