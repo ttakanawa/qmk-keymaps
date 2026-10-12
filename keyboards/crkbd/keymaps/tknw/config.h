@@ -8,15 +8,11 @@
 // Default tap-hold decision threshold
 #define TAPPING_TERM 145
 
-// Tap-hold keys become hold as soon as another key is pressed, except where
-// get_hold_on_other_key_press() opts out.
-#define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
+// Tap-hold keys become hold as soon as another key is pressed.
+#define HOLD_ON_OTHER_KEY_PRESS
 
 // Allow get_tapping_term() to override the tapping term for specific keys.
 #define TAPPING_TERM_PER_KEY
-
-// Decide same-hand tap-hold chords when the next key is pressed.
-#define CHORDAL_HOLD
 
 // RGB Matrix - disabled on startup
 #define RGB_MATRIX_DEFAULT_ON false

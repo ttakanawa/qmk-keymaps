@@ -30,7 +30,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
            NA,    KC_A,    KC_S,    KC_D,   KC_F,     KC_G,SFT_T(KC_ESC),    NA,    KC_H,    KC_J,    KC_K,   KC_L,LT(FUN,KC_SCLN),NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, SFT_T(KC_Z),KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SFT_T(KC_SLSH),NA,
+           NA, KC_Z,KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT,SFT_T(KC_SLSH),NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                OPT_T(KC_TAB),LCTL_T(KC_LNG2),KC_LCMD,SFT_T(KC_ENT),KC_SPC,LT(NUM, KC_LNG1)
                                       //`--------------------------'  `--------------------------'
@@ -146,23 +146,6 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         default:
             return TAPPING_TERM;
     }
-}
-
-bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
-    (void)record;
-
-    return keycode != SFT_T(KC_Z);
-}
-
-bool get_chordal_hold(uint16_t tap_hold_keycode, keyrecord_t *tap_hold_record,
-                      uint16_t other_keycode, keyrecord_t *other_record) {
-    (void)other_keycode;
-
-    if (tap_hold_keycode == SFT_T(KC_Z)) {
-        return get_chordal_hold_default(tap_hold_record, other_record);
-    }
-
-    return true;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
