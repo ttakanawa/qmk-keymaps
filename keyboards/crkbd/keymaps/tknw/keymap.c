@@ -164,11 +164,9 @@ uint16_t get_flow_tap_term(uint16_t keycode, keyrecord_t *record, uint16_t prev_
 
     // Only Space/Shift uses typing flow. A preceding Space tap bypasses
     // Flow Tap so the next press can immediately become Shift on a chord.
-    if (keycode == SPC_SFT && get_tap_keycode(prev_keycode) != KC_SPC &&
-        is_flow_tap_key(prev_keycode)) {
-        return FLOW_TAP_TERM;
-    }
-    return 0;
+    return (keycode == SPC_SFT && get_tap_keycode(prev_keycode) != KC_SPC &&
+            is_flow_tap_key(prev_keycode))
+               ? FLOW_TAP_TERM : 0;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
