@@ -137,11 +137,9 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     (void)record;
 
     switch (keycode) {
-        case SFT_T(KC_ENT):
         case LT(MOUSE, KC_VOLU):
             return 400;
         case TD(Q_NAV_ESC):
-        case SFT_T(KC_SLSH):
             return 200;
         default:
             return TAPPING_TERM;
