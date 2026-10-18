@@ -99,12 +99,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 static void q_nav_finished(tap_dance_state_t *state, void *user_data) {
     (void)user_data;
 
-    if (state->count == 1) {
-        if (state->pressed) {
-            layer_on(NAV);  // Hold: enable NAV
-        } else {
-            tap_code(KC_Q);  // Single tap: Q
-        }
+    if (state->count == 1 && state->pressed) {
+        layer_on(NAV);  // Hold: enable NAV
+    } else if (state->count == 1) {
+        tap_code(KC_Q);  // Single tap: Q
     } else if (state->count >= 2) {
         tap_code(KC_ESC);  // Double tap: ESC
     }
