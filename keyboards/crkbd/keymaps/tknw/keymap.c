@@ -4,10 +4,10 @@
 #define NA XXXXXXX
 
 // Layers
-enum layers { BASE, NAV, NUM, FUN, MOUSE, MISC };
+enum layers { BASE, NAV, NUM, MOUSE, FUN };
 
 // Custom keycodes
-enum custom_keycodes { LCBR_MISC = SAFE_RANGE };
+enum custom_keycodes { LCBR_FUN = SAFE_RANGE };
 
 // Tap Dance declarations
 enum { Q_NAV_ESC };
@@ -28,7 +28,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // Cursor navigation and window controls
   [NAV] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA, _______, LCBR_MISC, KC_UP,G(KC_RCBR),KC_PGUP,_______,         NA,      NA,      NA,      NA,      NA,      NA,      NA,
+           NA, _______, LCBR_FUN,  KC_UP,G(KC_RCBR),KC_PGUP,_______,         NA,      NA,      NA,      NA,      NA,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
      NA,LT(MOUSE, KC_VOLU),KC_LEFT,KC_DOWN,KC_RIGHT,KC_PGDN,_______,         NA,      NA,      NA,      NA,      NA,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
@@ -41,24 +41,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // Number and Symbols
   [NUM] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5, _______,         NA,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,      NA,
+           NA, KC_EXLM,   KC_AT, KC_HASH,      NA,  KC_GRV, _______,         NA, KC_COMM,    KC_7,    KC_8,    KC_9, KC_MINS,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, KC_LPRN, KC_CIRC, KC_SLSH,  KC_DLR, KC_RPRN, _______,         NA, KC_BSPC, KC_MINS,  KC_EQL,  KC_GRV, KC_QUOT,      NA,
+           NA, KC_LPRN, KC_CIRC, KC_QUOT,  KC_DLR, KC_RPRN, _______,         NA, KC_BSPC,    KC_4,    KC_5,    KC_6,  KC_EQL,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA, KC_LSFT,      NA, KC_BSLS, KC_LCBR, KC_RCBR,                      KC_LBRC, KC_RBRC, _______,_______,SFT_T(KC_BSLS), NA,
-  //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                          _______, _______, _______,    _______, _______, _______
-                                      //`--------------------------'  `--------------------------'
-  ),
-
-  // Function keys
-  [FUN] = LAYOUT_split_3x6_3_ex2(
-  //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5, _______,         NA,   KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,      NA,
-  //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA,  KC_F11,  KC_F12,  KC_F13,  KC_F14,  KC_F15, _______,         NA,  KC_F16,  KC_F17,  KC_F18,  KC_F19, _______,      NA,
-  //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
-           NA,      NA,      NA,      NA,      NA,      NA,                      RM_TOGG, QK_BOOT,      NA,      NA,      NA,      NA,
+           NA, KC_LBRC, KC_RBRC, KC_BSLS, KC_LCBR, KC_RCBR,                       KC_DOT,    KC_1,    KC_2,    KC_3, SFT_T(KC_0),  NA,
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    _______, _______, _______
                                       //`--------------------------'  `--------------------------'
@@ -77,17 +64,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                       //`--------------------------'  `--------------------------'
   ),
 
-  // Miscellaneous
-  [MISC] = LAYOUT_split_3x6_3_ex2(
-  //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA,      NA,      NA, G(KC_1), G(KC_2), G(KC_3),HYPR(KC_0),       NA,      NA,      NA,      NA,      NA,      NA,      NA,
-  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-       NA,LSG(KC_4),LSG(KC_5),LCSG(KC_4), G(KC_8), G(KC_9),HYPR(KC_9),       NA,      NA,      NA,      NA,      NA,      NA,      NA,
-  //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
- NA,HYPR(KC_8),HYPR(KC_7),HYPR(KC_6),HYPR(KC_5),HYPR(KC_4),                           NA,      NA,      NA,      NA,      NA,      NA,
-  //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-                                   HYPR(KC_3),HYPR(KC_2),HYPR(KC_1),    _______, _______, _______
-                                      //`--------------------------'  `--------------------------'
+  // Function
+  [FUN] = LAYOUT_split_3x6_3_ex2(
+  //,--------------------------------------------------------------.  ,--------------------------------------------------------------. 
+           NA,      NA,      NA, KC_HYPR,      NA,      NA,HYPR(KC_5),       NA,      NA,   KC_F7,   KC_F8,   KC_F9,  KC_F10,      NA, 
+  //|--------+--------+--------+--------+--------+--------+--------|  `--------+--------+--------+--------+--------+--------+--------| 
+           NA,      NA,      NA,      NA,      NA,      NA,HYPR(KC_4),       NA, QK_BOOT,   KC_F4,   KC_F5,   KC_F6,  KC_F11,      NA, 
+  //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------| 
+           NA,      NA,      NA,      NA,      NA,      NA,                      RM_TOGG,   KC_F1,   KC_F2,   KC_F3,  KC_F12,      NA, 
+  //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------| 
+                                   HYPR(KC_3),HYPR(KC_2),HYPR(KC_1),    _______, _______, _______                                      
+                                      //`--------------------------'  `--------------------------'                                     
   )
 };
 
@@ -116,9 +103,9 @@ tap_dance_action_t tap_dance_actions[] = {
     [Q_NAV_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_nav_finished, q_nav_reset)
 };
 
-// Custom Left Brace/Miscellaneous layer key state tracking
-static bool lcbr_misc_used = false;
-static uint16_t lcbr_misc_timer = 0;
+// Custom Left Brace/Function layer key state tracking
+static bool lcbr_fun_used = false;
+static uint16_t lcbr_fun_timer = 0;
 
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     (void)record;
@@ -134,22 +121,22 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (keycode == LCBR_MISC) {
+    if (keycode == LCBR_FUN) {
         if (record->event.pressed) {
-            lcbr_misc_used = false;
-            lcbr_misc_timer = timer_read();
-            layer_on(MISC);
+            lcbr_fun_used = false;
+            lcbr_fun_timer = timer_read();
+            layer_on(FUN);
         } else {
-            layer_off(MISC);
-            if (!lcbr_misc_used && timer_elapsed(lcbr_misc_timer) < TAPPING_TERM) {
+            layer_off(FUN);
+            if (!lcbr_fun_used && timer_elapsed(lcbr_fun_timer) < TAPPING_TERM) {
                 tap_code16(G(KC_LCBR));
             }
         }
         return false;
     }
 
-    if (record->event.pressed && IS_LAYER_ON(MISC) && !IS_MODIFIER_KEYCODE(keycode)) {
-        lcbr_misc_used = true;
+    if (record->event.pressed && IS_LAYER_ON(FUN) && !IS_MODIFIER_KEYCODE(keycode)) {
+        lcbr_fun_used = true;
     }
 
     return true;
