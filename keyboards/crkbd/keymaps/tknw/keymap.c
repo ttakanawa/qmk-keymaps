@@ -6,8 +6,8 @@
 // Layers
 enum layers { BASE, NAV, NUM, MOUSE, FUN };
 
-// Custom keycodes
-enum custom_keycodes { LCBR_FUN = SAFE_RANGE };
+// Tap-hold aliases
+#define LCBR_FUN LT(FUN, KC_LBRC)
 
 // Tap Dance declarations
 enum { Q_NAV_ESC };
@@ -103,10 +103,6 @@ tap_dance_action_t tap_dance_actions[] = {
     [Q_NAV_ESC] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_nav_finished, q_nav_reset)
 };
 
-// Custom Left Brace/Function layer key state tracking
-static bool lcbr_fun_used = false;
-static uint16_t lcbr_fun_timer = 0;
-
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     (void)record;
 
@@ -121,22 +117,12 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (keycode == LCBR_FUN) {
+    // LT/MT accept only basic tap keycodes, so send the modified taps here.
+    if (record->tap.count && keycode == LCBR_FUN) {
         if (record->event.pressed) {
-            lcbr_fun_used = false;
-            lcbr_fun_timer = timer_read();
-            layer_on(FUN);
-        } else {
-            layer_off(FUN);
-            if (!lcbr_fun_used && timer_elapsed(lcbr_fun_timer) < TAPPING_TERM) {
-                tap_code16(G(KC_LCBR));
-            }
+            tap_code16(G(KC_LCBR));
         }
         return false;
-    }
-
-    if (record->event.pressed && IS_LAYER_ON(FUN) && !IS_MODIFIER_KEYCODE(keycode)) {
-        lcbr_fun_used = true;
     }
 
     return true;
