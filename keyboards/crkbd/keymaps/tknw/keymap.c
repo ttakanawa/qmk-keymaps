@@ -28,7 +28,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // Cursor navigation and window controls
   [NAV] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-           NA, _______, LCBR_FUN,  KC_UP,G(KC_RCBR),KC_PGUP,_______,         NA,      NA,      NA,      NA,      NA,      NA,      NA,
+           NA, MO(NAV), LCBR_FUN,  KC_UP,G(KC_RCBR),KC_PGUP,_______,         NA,      NA,      NA,      NA,      NA,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
      NA,LT(MOUSE, KC_VOLU),KC_LEFT,KC_DOWN,KC_RIGHT,KC_PGDN,_______,         NA,      NA,      NA,      NA,      NA,      NA,      NA,
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------|
@@ -67,7 +67,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // Function
   [FUN] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------. 
-           NA,      NA,      NA, KC_HYPR,      NA,      NA,HYPR(KC_5),       NA,      NA,   KC_F7,   KC_F8,   KC_F9,  KC_F10,      NA, 
+           NA, MO(NAV),LCBR_FUN, KC_HYPR,      NA,      NA,HYPR(KC_5),       NA,      NA,   KC_F7,   KC_F8,   KC_F9,  KC_F10,      NA, 
   //|--------+--------+--------+--------+--------+--------+--------|  `--------+--------+--------+--------+--------+--------+--------| 
            NA,      NA,      NA,      NA,      NA,      NA,HYPR(KC_4),       NA, QK_BOOT,   KC_F4,   KC_F5,   KC_F6,  KC_F11,      NA, 
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------| 
@@ -114,6 +114,15 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         default:
             return TAPPING_TERM;
     }
+}
+
+bool pre_process_record_user(uint16_t keycode, keyrecord_t *record) {
+    // Resolve Tap Dance layers before QMK classifies the next tap-hold key.
+    if (preprocess_tap_dance(keycode, record)) {
+        get_record_keycode(record, true);
+    }
+
+    return true;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
