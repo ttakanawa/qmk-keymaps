@@ -8,6 +8,7 @@ enum layers { BASE, NAV, NUM, MOUSE, FUN };
 
 // Tap-hold aliases
 #define LCBR_FUN LT(FUN, KC_LBRC)
+#define HYPR_G1 HYPR_T(KC_1)
 
 // Tap Dance declarations
 enum { Q_NAV_ESC };
@@ -67,11 +68,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // Function
   [FUN] = LAYOUT_split_3x6_3_ex2(
   //,--------------------------------------------------------------.  ,--------------------------------------------------------------. 
-           NA, MO(NAV),LCBR_FUN, KC_HYPR,      NA,      NA,HYPR(KC_5),       NA,      NA,   KC_F7,   KC_F8,   KC_F9,  KC_F10,      NA, 
+           NA, MO(NAV),LCBR_FUN, HYPR_G1,  G(KC_9),      NA,HYPR(KC_5),       NA,      NA,   KC_F7,   KC_F8,   KC_F9,  KC_F10,      NA,
   //|--------+--------+--------+--------+--------+--------+--------|  `--------+--------+--------+--------+--------+--------+--------| 
-           NA,      NA,      NA,      NA,      NA,      NA,HYPR(KC_4),       NA, QK_BOOT,   KC_F4,   KC_F5,   KC_F6,  KC_F11,      NA, 
+           NA,      NA,      NA,HYPR(KC_8),HYPR(KC_7),HYPR(KC_6),HYPR(KC_4), NA, QK_BOOT,   KC_F4,   KC_F5,   KC_F6,  KC_F11,      NA, 
   //|--------+--------+--------+--------+--------+--------+--------'  `--------+--------+--------+--------+--------+--------+--------| 
-           NA,      NA,      NA,      NA,      NA,      NA,                      RM_TOGG,   KC_F1,   KC_F2,   KC_F3,  KC_F12,      NA, 
+           NA,      NA,      NA,LSG(KC_4),LSG(KC_5),LCSG(KC_4),                  RM_TOGG,   KC_F1,   KC_F2,   KC_F3,  KC_F12,      NA, 
   //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------| 
                                    HYPR(KC_3),HYPR(KC_2),HYPR(KC_1),    _______, _______, _______                                      
                                       //`--------------------------'  `--------------------------'                                     
@@ -127,9 +128,9 @@ bool pre_process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     // LT/MT accept only basic tap keycodes, so send the modified taps here.
-    if (record->tap.count && keycode == LCBR_FUN) {
+    if (record->tap.count && (keycode == LCBR_FUN || keycode == HYPR_G1)) {
         if (record->event.pressed) {
-            tap_code16(G(KC_LCBR));
+            tap_code16(keycode == LCBR_FUN ? G(KC_LCBR) : G(KC_1));
         }
         return false;
     }
