@@ -108,8 +108,6 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     (void)record;
 
     switch (keycode) {
-        case TD(Q_NAV_ESC):
-            return 200;
         case LT(MOUSE, KC_VOLU):
             return 400;
         default:
